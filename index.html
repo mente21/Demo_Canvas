@@ -1034,7 +1034,7 @@
         <div class="download-wrap">
           <button class="btn btn-success btn-download" onclick="downloadImage()">⬇️ Download Preview</button>
           <button class="btn btn-outline-accent btn-download" onclick="gotoStep(2)">✏️ Edit Again</button>
-          <button class="btn btn-secondary btn-download" onclick="gotoStep(0)">🔄 Start Over</button>
+          <button class="btn btn-secondary btn-download" onclick="startOver()">🔄 Start Over</button>
         </div>
       </div>
     </div>
@@ -1096,6 +1096,7 @@ function resetFilters() {
   document.getElementById('a_vignette').value=0; document.getElementById('al_vignette').textContent=0;
   
   renderEditor(); showToast('Filters reset');
+  persistState();
 }
 
 /* Platform config */
@@ -1473,6 +1474,7 @@ function gotoStep(n) {
   }
   if (n===3) setTimeout(renderPreview, 60);
   window.scrollTo({top:120, behavior:'smooth'});
+  persistState();
 }
 
 function jumpTo(n) {
@@ -1515,6 +1517,8 @@ function loadFile(file) {
     document.getElementById('previewSize').textContent = (file.size/1024).toFixed(1)+' KB';
     document.getElementById('uploadPreviewWrap').classList.add('show');
     showToast('✓ Image loaded!');
+    persistState();
+    persistImage(uploadedImg);
   };
   uploadedImg.src = url;
 }
@@ -1523,6 +1527,17 @@ function removeImage() {
   uploadedImg = null;
   document.getElementById('fileInput').value='';
   document.getElementById('uploadPreviewWrap').classList.remove('show');
+  localStorage.removeItem('canvasflow_img');
+  localStorage.removeItem('canvasflow_img_meta');
+}
+
+function startOver() {
+  if (confirm('This will clear your current design. Are you sure?')) {
+    localStorage.removeItem('canvasflow_state');
+    localStorage.removeItem('canvasflow_img');
+    localStorage.removeItem('canvasflow_img_meta');
+    location.reload();
+  }
 }
 
 /* ===================================================
@@ -1546,12 +1561,15 @@ function pushState() {
   // Optional: cap historical stack size
   if (historyStack.length > 50) historyStack.shift();
   else historyIndex++;
+  
+  persistState();
 }
 
 function undo() {
   if (historyIndex > 0) {
     historyIndex--;
     applyHistoryState(historyStack[historyIndex]);
+    persistState();
   } else {
     showToast('Nothing to undo');
   }
@@ -1561,6 +1579,7 @@ function redo() {
   if (historyIndex < historyStack.length - 1) {
     historyIndex++;
     applyHistoryState(historyStack[historyIndex]);
+    persistState();
   } else {
     showToast('Nothing to redo');
   }
@@ -1613,6 +1632,7 @@ function randomizeFilters() {
   syncFiltersUI();
   renderEditor();
   showToast('🎲 Randomized!');
+  persistState();
 }
 
 function createConfetti() {
@@ -1684,6 +1704,7 @@ function addTextLayer() {
   buildLayersList();
   syncLayerUI();
   renderEditor();
+  persistState();
 }
 
 function deleteTextLayer(e, idx) {
@@ -1698,6 +1719,7 @@ function deleteTextLayer(e, idx) {
   buildLayersList();
   syncLayerUI();
   renderEditor();
+  persistState();
 }
 
 function switchLayer(idx) {
@@ -1761,10 +1783,9 @@ function syncLayerUI() {
 }
 
 function updateActiveLayer(key, val) {
-  // Save state on start of interaction if needed, or periodically
-  // For sliders/text, we'll save on 'change' but update on 'input'
   textLayers[activeLayerIndex][key] = val;
   renderEditor();
+  persistState(); // Immediate save on every keystroke/change
 }
 
 function setColor(el) {
@@ -1982,6 +2003,85 @@ function showToast(msg) {
 buildTemplateGrid();
 initEmojiList();
 initCanvasInteractions();
+loadPersistedState();
+
+/* ===================================================
+   PERSISTENCE
+=================================================== */
+function persistState() {
+  const state = {
+    F, A, 
+    selectedTpl, 
+    currentStep, 
+    activePlatform,
+    textLayers,
+    activeLayerIndex
+  };
+  localStorage.setItem('canvasflow_state', JSON.stringify(state));
+}
+
+function persistImage(img) {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    // Scale down for storage (5MB limit)
+    const MAX_DIM = 800;
+    let w = img.width, h = img.height;
+    if (w > MAX_DIM || h > MAX_DIM) {
+      if (w > h) { h *= (MAX_DIM/w); w = MAX_DIM; }
+      else { w *= (MAX_DIM/h); h = MAX_DIM; }
+    }
+    canvas.width = w; canvas.height = h;
+    ctx.drawImage(img, 0, 0, w, h);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    localStorage.setItem('canvasflow_img', dataUrl);
+    localStorage.setItem('canvasflow_img_meta', JSON.stringify({ 
+      name: document.getElementById('previewName').textContent, 
+      size: document.getElementById('previewSize').textContent 
+    }));
+  } catch(e) { console.warn('Storage quota exceeded, image not cached'); }
+}
+
+function loadPersistedState() {
+  const s = localStorage.getItem('canvasflow_state');
+  const imgData = localStorage.getItem('canvasflow_img');
+  
+  if (s) {
+    try {
+      const state = JSON.parse(s);
+      Object.assign(F, state.F);
+      Object.assign(A, state.A);
+      selectedTpl = state.selectedTpl || 0;
+      currentStep = state.currentStep || 0;
+      activePlatform = state.activePlatform || 'instagram';
+      textLayers = state.textLayers || textLayers;
+      activeLayerIndex = state.activeLayerIndex || 0;
+      
+      syncFiltersUI();
+      buildLayersList();
+      syncLayerUI(); // Important: Update the text inputs!
+      
+      // Go to step immediately so UI looks correct while image loads
+      gotoStep(currentStep);
+    } catch(e) { console.error('Persistence load error', e); }
+  }
+
+  if (imgData) {
+    uploadedImg = new Image();
+    uploadedImg.onload = () => {
+      document.getElementById('previewThumb').src = imgData;
+      const meta = JSON.parse(localStorage.getItem('canvasflow_img_meta') || '{}');
+      document.getElementById('previewName').textContent = meta.name || 'recovered.jpg';
+      document.getElementById('previewSize').textContent = meta.size || '0 KB';
+      document.getElementById('uploadPreviewWrap').classList.add('show');
+      
+      // Re-trigger render to show the image
+      if (currentStep >= 2) renderEditor();
+      if (currentStep === 3) renderPreview();
+    };
+    uploadedImg.src = imgData;
+  }
+}
 </script>
 </body>
 </html>
