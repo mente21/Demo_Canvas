@@ -563,23 +563,173 @@
 
     /* ── Toast ── */
     #toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: linear-gradient(135deg, var(--accent1), var(--accent2));
-      color: #fff;
-      padding: 0.75rem 1.5rem;
-      border-radius: 99px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-      z-index: 999;
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: rgba(15,23,42,0.9); backdrop-filter: blur(8px);
+      color: #fff; padding: 12px 24px; border-radius: 50px;
+      font-size: 0.9rem; font-weight: 500; z-index: 5000;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+      opacity: 0; pointer-events: none;
+      display: flex; align-items: center; gap: 8px;
     }
-    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* ── Scrollbar ── */
+    /* ── Confetti ── */
+    .confetti {
+      position: fixed; width: 10px; height: 10px; pointer-events: none; z-index: 6000;
+      border-radius: 2px;
+    }
+
+    /* ── Filter sliders ── */
+    .filters-section {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 1rem 1.1rem;
+      margin-top: 1rem;
+    }
+    .filters-section .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+    .filters-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem 1.2rem;
+    }
+    .filter-item .field-label { margin-bottom: 3px; }
+
+    /* ── Emoji picker ── */
+    .emoji-wrap { position: relative; }
+    .emoji-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 50;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.6rem;
+      width: 260px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .emoji-panel.open { display: flex; }
+    .ep-emoji {
+      font-size: 1.35rem;
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 4px;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+    .ep-emoji:hover { background: rgba(255,255,255,0.1); }
+    .ep-target-row {
+      display: flex; gap: 6px; margin-bottom: 6px; width: 100%;
+    }
+    .ep-target-btn {
+      flex: 1; font-size: 0.72rem; font-weight: 600;
+      padding: 4px 8px; border-radius: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); cursor: pointer; transition: all 0.18s;
+    }
+    .ep-target-btn.active { background: var(--accent1); border-color: transparent; color:#fff; }
+
+    /* ── Platform tabs ── */
+    .platform-tabs {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .plt-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.8rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.22s;
+    }
+    .plt-btn:hover { border-color: var(--accent1); color: var(--text); }
+    .plt-btn.active {
+      border-color: var(--accent1);
+      background: rgba(124,92,252,0.15);
+      color: var(--text);
+      box-shadow: 0 0 12px rgba(124,92,252,0.25);
+    }
+    /* Platform mockup frames */
+    .mockup-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+    /* Phone frame for stories */
+    .phone-frame {
+      background: #1a1d2b;
+      border: 3px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+      max-width: 240px;
+    }
+    .phone-frame canvas { display: block; width: 100%; }
+    /* Feed post frame: rounded card */
+    .post-frame {
+      background: #1e2030;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      max-width: 380px; width: 100%;
+    }
+    .post-frame canvas { display: block; width: 100%; }
+    .post-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+    }
+    .post-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+    .post-username { font-size: 0.82rem; font-weight: 600; }
+    .post-footer {
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .platform-note {
+      font-size: 0.75rem; color: var(--muted);
+      text-align: center;
+      padding: 4px 0;
+    }
+
+    /* ── Layer items ── */
+    .layer-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; border-radius: var(--r-sm);
+      background: var(--surface); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .layer-item:hover { border-color: var(--accent1); }
+    .layer-item.selected { 
+      background: rgba(124,92,252,0.1); 
+      border-color: var(--accent1);
+      box-shadow: 0 0 10px rgba(124,92,252,0.15);
+    }
+    .layer-info { flex: 1; display: flex; flex-direction: column; }
+    .layer-name { font-size: 0.82rem; font-weight: 600; }
+    .layer-sub { font-size: 0.7rem; color: var(--muted); }
+    .layer-del {
+      padding: 4px 8px; font-size: 0.8rem; color: var(--muted);
+      cursor: pointer; opacity: 0.5; transition: opacity 0.2s;
+    }
+    .layer-del:hover { opacity: 1; color: var(--danger); }
+
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
@@ -593,7 +743,7 @@
     <div class="logo-icon">🎨</div>
     <span>CanvasFlow</span>
   </div>
-  <span class="nav-badge">✦ Photo Editor Demo</span>
+  <span class="nav-badge" style="background: rgba(124, 92, 252, 0.15); border: 1px solid var(--accent1); color: var(--accent1); font-weight: 700;">✦ Prepared for Hulk David</span>
 </nav>
 
 <!-- ── MAIN PAGE ── -->
@@ -668,26 +818,57 @@
     </div>
   </div>
 
-  <!-- ── STEP 3: TEXT ── -->
+  <!-- ── STEP 3: TEXT & FILTERS ── -->
   <div class="panel" id="panel-2">
-    <div class="panel-title">✏️ Add Your Text</div>
-    <div class="panel-sub">Customize your caption, font, size and color in real-time</div>
+    <div class="panel-title">✏️ Add Text &amp; Adjust Image</div>
+    <div class="panel-sub">Customize caption, color, filters — updates live on canvas</div>
 
     <div class="text-layout">
       <!-- Controls -->
       <div class="controls-col">
+        <!-- Text Layers Manager -->
+        <div class="filters-section" style="margin-top:0; padding: 0.75rem;">
+          <div class="section-head" style="margin-bottom:0.5rem; justify-content:space-between;">
+            <div class="field-label" style="margin:0">📚 Text Layers</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="plt-btn" style="padding:4px 12px; font-size:0.75rem" onclick="addTextLayer()" title="Add a new text block">+ Text</button>
+              <button class="plt-btn" style="padding:4px 12px; font-size:0.75rem" onclick="setEmojiTarget('sticker'); toggleEmojiPanel();" title="Add emoji as a separate layer">+ ✨ Emoji</button>
+            </div>
+          </div>
+          <div id="layersList" style="display:flex; flex-direction:column; gap:6px;">
+            <!-- Layers will be injected here -->
+          </div>
+        </div>
+
+        <!-- Emoji picker -->
+        <div class="emoji-wrap">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:0.5rem">
+            <div class="field-label" style="margin:0" id="mainLabel">Caption</div>
+            <button class="plt-btn" style="padding:3px 10px;font-size:0.75rem" onclick="toggleEmojiPanel()">😊 Emoji</button>
+            <div style="flex:1"></div>
+            <button class="plt-btn" style="padding:3px 10px;font-size:0.75rem" onclick="undo()" title="Undo (Ctrl+Z)">⟲</button>
+            <button class="plt-btn" style="padding:3px 10px;font-size:0.75rem" onclick="redo()" title="Redo (Ctrl+Y)">⟳</button>
+          </div>
+          <div class="emoji-panel" id="emojiPanel">
+            <div class="ep-target-row">
+              <button class="ep-target-btn active" id="epMain" onclick="setEmojiTarget('main')">Main</button>
+              <button class="ep-target-btn" id="epSub" onclick="setEmojiTarget('sub')">Sub</button>
+              <button class="ep-target-btn" id="epSticker" onclick="setEmojiTarget('sticker')">✨ Sticker</button>
+            </div>
+            <div id="emojiList" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+          </div>
+        </div>
         <div>
-          <div class="field-label">Main Caption</div>
-          <input class="field-input" id="txtMain" type="text" placeholder="Your headline text…" value="Your Story Here" oninput="renderEditor()">
+          <input class="field-input" id="txtMain" type="text" placeholder="Your headline text…" oninput="updateActiveLayer('text', this.value)" onchange="pushState()">
         </div>
         <div>
           <div class="field-label">Sub Caption</div>
-          <input class="field-input" id="txtSub" type="text" placeholder="A short tagline…" value="Captured in a moment" oninput="renderEditor()">
+          <input class="field-input" id="txtSub" type="text" placeholder="A short tagline…" oninput="updateActiveLayer('subText', this.value)" onchange="pushState()">
         </div>
         <div class="font-row">
           <div>
-            <div class="field-label">Font Family</div>
-            <select class="field-input" id="fontFamily" onchange="renderEditor()">
+            <div class="field-label">Font</div>
+            <select class="field-input" id="fontFamily" onchange="pushState(); updateActiveLayer('fontFamily', this.value)">
               <option value="Georgia, serif">Georgia</option>
               <option value="'Arial', sans-serif">Arial</option>
               <option value="'Verdana', sans-serif">Verdana</option>
@@ -697,8 +878,8 @@
             </select>
           </div>
           <div>
-            <div class="field-label">Font Size: <span id="sizeVal">28</span>px</div>
-            <input type="range" id="fontSize" min="12" max="72" value="28" oninput="document.getElementById('sizeVal').textContent=this.value; renderEditor()">
+            <div class="field-label">Size: <span id="sizeVal">28</span>px</div>
+            <input type="range" id="fontSize" min="12" max="72" value="28" oninput="document.getElementById('sizeVal').textContent=this.value; updateActiveLayer('fontSize', parseInt(this.value))" onchange="pushState()">
           </div>
         </div>
         <div>
@@ -710,12 +891,12 @@
             <div class="color-swatch" style="background:#56cffc" data-color="#56cffc" onclick="setColor(this)"></div>
             <div class="color-swatch" style="background:#45e0a0" data-color="#45e0a0" onclick="setColor(this)"></div>
             <div class="color-swatch" style="background:#c56cfc" data-color="#c56cfc" onclick="setColor(this)"></div>
-            <input type="color" class="field-input" id="customColor" value="#ffffff" oninput="customColorChange(this)" style="width:60px;height:30px;padding:2px 4px;border-radius:50%;cursor:pointer;">
+            <input type="color" class="field-input" id="customColor" value="#ffffff" oninput="updateActiveLayer('color', this.value)" onchange="pushState()" style="width:60px;height:30px;padding:2px 4px;border-radius:50%;cursor:pointer;">
           </div>
         </div>
         <div>
           <div class="field-label">Text Opacity: <span id="opacityVal">100</span>%</div>
-          <input type="range" id="textOpacity" min="10" max="100" value="100" oninput="document.getElementById('opacityVal').textContent=this.value; renderEditor()">
+          <input type="range" id="textOpacity" min="10" max="100" value="100" oninput="document.getElementById('opacityVal').textContent=this.value; updateActiveLayer('opacity', this.value/100)" onchange="pushState()">
         </div>
         <div>
           <div class="field-label">Text Position</div>
@@ -731,6 +912,53 @@
             <button class="pos-btn" onclick="setPosBtn(this,'bot-right')"></button>
           </div>
         </div>
+
+        <!-- Image filters -->
+        <div class="filters-section">
+          <div class="section-head">
+            <div class="field-label" style="margin:0">🎨 Image Adjustments</div>
+            <div style="display:flex; gap:8px">
+              <button class="plt-btn" style="padding:3px 10px;font-size:0.72rem" onclick="randomizeFilters()" title="Generate random filter settings">🎲 Surprise Me</button>
+              <button class="plt-btn" style="padding:3px 10px;font-size:0.72rem" onclick="resetFilters()" title="Reset all adjustments">↺ Reset</button>
+            </div>
+          </div>
+          <div class="filters-grid-2">
+            <div class="filter-item">
+              <div class="field-label">Brightness: <span id="fl_brightness">100</span>%</div>
+              <input type="range" id="f_brightness" min="0" max="200" value="100" oninput="F.brightness=+this.value;document.getElementById('fl_brightness').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+            <div class="filter-item">
+              <div class="field-label">Contrast: <span id="fl_contrast">100</span>%</div>
+              <input type="range" id="f_contrast" min="0" max="200" value="100" oninput="F.contrast=+this.value;document.getElementById('fl_contrast').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+            <div class="filter-item">
+              <div class="field-label">Saturation: <span id="fl_saturation">100</span>%</div>
+              <input type="range" id="f_saturation" min="0" max="200" value="100" oninput="F.saturation=+this.value;document.getElementById('fl_saturation').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+            <div class="filter-item">
+              <div class="field-label">Blur: <span id="fl_blur">0</span>px</div>
+              <input type="range" id="f_blur" min="0" max="15" value="0" oninput="F.blur=+this.value;document.getElementById('fl_blur').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+            <div class="filter-item">
+              <div class="field-label">Grayscale: <span id="fl_grayscale">0</span>%</div>
+              <input type="range" id="f_grayscale" min="0" max="100" value="0" oninput="F.grayscale=+this.value;document.getElementById('fl_grayscale').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+            <div class="filter-item">
+              <div class="field-label">Sepia: <span id="fl_sepia">0</span>%</div>
+              <input type="range" id="f_sepia" min="0" max="100" value="0" oninput="F.sepia=+this.value;document.getElementById('fl_sepia').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+          </div>
+          <div class="filters-grid-2" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border)">
+            <div class="filter-item">
+              <div class="field-label">Corner Radius: <span id="al_radius">0</span>px</div>
+              <input type="range" id="a_radius" min="0" max="100" value="0" oninput="A.radius=+this.value;document.getElementById('al_radius').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+            <div class="filter-item">
+              <div class="field-label">Vignette: <span id="al_vignette">0</span>%</div>
+              <input type="range" id="a_vignette" min="0" max="100" value="0" oninput="A.vignette=this.value/100;document.getElementById('al_vignette').textContent=this.value;renderEditor()" onchange="pushState()">
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Canvas preview -->
@@ -741,18 +969,28 @@
 
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="gotoStep(1)">← Back</button>
-      <button class="btn btn-primary" onclick="gotoStep(3)">Next: Preview & Download →</button>
+      <button class="btn btn-primary" onclick="gotoStep(3)">Next: Preview &amp; Download →</button>
     </div>
   </div>
 
   <!-- ── STEP 4: PREVIEW ── -->
   <div class="panel" id="panel-3">
-    <div class="panel-title">🎉 Preview & Download</div>
-    <div class="panel-sub">Your design is ready with a watermark. Upgrade to remove it!</div>
+    <div class="panel-title">🎉 Preview &amp; Download</div>
+    <div class="panel-sub">See how your design looks on each platform, then download</div>
+
+    <!-- Platform tabs -->
+    <div class="platform-tabs">
+      <button class="plt-btn active" id="plt-insta" onclick="setPlatform('instagram')">📷 Instagram Post</button>
+      <button class="plt-btn" id="plt-story" onclick="setPlatform('story')">📱 Instagram Story</button>
+      <button class="plt-btn" id="plt-fb" onclick="setPlatform('facebook')">📘 Facebook</button>
+      <button class="plt-btn" id="plt-twitter" onclick="setPlatform('twitter')">🐦 Twitter / X</button>
+    </div>
 
     <div class="preview-layout">
-      <div class="preview-main-canvas">
-        <canvas id="previewCanvas" width="800" height="600"></canvas>
+      <!-- Platform mockup -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1rem">
+        <div id="platformMockup"></div>
+        <div class="platform-note" id="platformNote">Instagram · 1080×1080px · Square Post</div>
       </div>
 
       <div class="preview-side">
@@ -762,12 +1000,35 @@
           <div class="info-row"><span>Caption</span><span id="sumCaption">—</span></div>
           <div class="info-row"><span>Font</span><span id="sumFont">—</span></div>
           <div class="info-row"><span>Size</span><span id="sumSize">—</span></div>
-          <div class="info-row"><span>Resolution</span><span>800 × 600 px</span></div>
+          <div class="info-row"><span>Platform</span><span id="sumPlatform">Instagram</span></div>
+          <div class="info-row"><span>Resolution</span><span id="sumRes">1080×1080px</span></div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-title">💾 Export Settings</div>
+          <div style="display:flex; flex-direction:column; gap:0.8rem">
+            <div>
+              <div class="field-label" style="font-size:0.65rem">Format</div>
+              <select class="field-input" style="padding:4px 8px; font-size:0.8rem" onchange="EXPORT.format=this.value; document.getElementById('qualityRow').style.display=(this.value==='image/png'?'none':'flex')">
+                <option value="image/png">PNG (Lossless)</option>
+                <option value="image/jpeg">JPG (Compressed)</option>
+                <option value="image/webp">WEBP (Modern)</option>
+              </select>
+            </div>
+            <div id="qualityRow" style="display:none; align-items:center; gap:8px">
+              <div class="field-label" style="font-size:0.65rem; margin:0">Quality: <span id="eq_val">92</span>%</div>
+              <input type="range" min="10" max="100" value="92" oninput="EXPORT.quality=this.value/100; document.getElementById('eq_val').textContent=this.value" style="flex:1">
+            </div>
+          </div>
         </div>
 
         <div class="watermark-note">
           <span class="wnote-icon">💧</span>
-          <span>The preview includes a <strong>watermark</strong>. Purchase a license to export a clean, watermark-free version at full resolution.</span>
+          <span>Preview includes a <strong>watermark</strong>. Purchase a license to export clean full-res.</span>
+        </div>
+
+        <div style="margin-top: 0.5rem">
+           <button class="btn btn-secondary btn-download" style="border-style: dashed" onmousedown="isComparing=true; renderPreview()" onmouseup="isComparing=false; renderPreview()" onmouseleave="isComparing=false; renderPreview()">🔍 Hold to Compare Original</button>
         </div>
 
         <div class="download-wrap">
@@ -791,8 +1052,59 @@
 let uploadedImg   = null;
 let selectedTpl   = 0;
 let currentStep   = 0;
-let textColor     = '#ffffff';
-let textPos       = 'bot-left';
+let activePlatform = 'instagram';
+let emojiTarget    = 'main'; // used to identify which text field is active in the emoji picker logic
+
+// Text Layers State
+let textLayers = [
+  { 
+    id: Date.now(),
+    text: 'Your Story Here', 
+    subText: 'Captured in a moment',
+    color: '#ffffff', 
+    pos: 'bot-left', 
+    dragOffset: { x: 0, y: 0 },
+    fontSize: 28,
+    fontFamily: 'Georgia, serif',
+    opacity: 1
+  }
+];
+let activeLayerIndex = 0;
+let isDraggingText = false;
+let dragStart      = { x: 0, y: 0 };
+let isComparing    = false; // Before/After toggle
+
+// History Stack
+let historyStack = [];
+let historyIndex = -1;
+
+/* Image Adjustments */
+const F = { brightness:100, contrast:100, saturation:100, blur:0, grayscale:0, sepia:0 };
+const A = { radius: 0, vignette: 0 }; // Radius 0-100, Vignette 0-1
+const EXPORT = { format: 'image/png', quality: 0.92 };
+
+function getFilterString() {
+  return `brightness(${F.brightness}%) contrast(${F.contrast}%) saturate(${F.saturation}%) blur(${F.blur}px) grayscale(${F.grayscale}%) sepia(${F.sepia}%)`;
+}
+function resetFilters() {
+  pushState();
+  F.brightness=100; F.contrast=100; F.saturation=100; F.blur=0; F.grayscale=0; F.sepia=0;
+  A.radius=0; A.vignette=0;
+  
+  syncFiltersUI();
+  document.getElementById('a_radius').value=0; document.getElementById('al_radius').textContent=0;
+  document.getElementById('a_vignette').value=0; document.getElementById('al_vignette').textContent=0;
+  
+  renderEditor(); showToast('Filters reset');
+}
+
+/* Platform config */
+const PLATFORMS = {
+  instagram: { name:'Instagram Post',  w:1080, h:1080, note:'Instagram · 1080×1080px · Square Post',  icon:'📷' },
+  story:     { name:'Instagram Story', w:1080, h:1920, note:'Instagram Story · 1080×1920px · 9:16', icon:'📱' },
+  facebook:  { name:'Facebook Post',   w:1200, h:630,  note:'Facebook · 1200×630px · Landscape',     icon:'📘' },
+  twitter:   { name:'Twitter / X',     w:1200, h:675,  note:'Twitter/X · 1200×675px · 16:9 Card',    icon:'🐦' },
+};
 
 /* ===================================================
    TEMPLATES (drawn on off-screen canvases)
@@ -874,11 +1186,11 @@ function drawVintage(ctx, w, h) {
 /* ===================================================
    RENDER HELPERS
 =================================================== */
-function compositeOntoCanvas(ctx, w, h, tImg, addWatermark) {
+function compositeOntoCanvas(ctx, w, h, tImg, addWatermark, isOriginal) {
   ctx.clearRect(0,0,w,h);
-  const b = Math.round(w * 0.04);
+  const b = isOriginal ? 0 : Math.round(w * 0.04);
 
-  // 1. Draw uploaded image into the inner rectangle
+  // 1. Draw uploaded image
   if (uploadedImg) {
     const iw = uploadedImg.naturalWidth || uploadedImg.width;
     const ih = uploadedImg.naturalHeight || uploadedImg.height;
@@ -887,10 +1199,37 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark) {
     const sw = iw*scale, sh = ih*scale;
     const sx = b + (rw-sw)/2, sy = b + (rh-sh)/2;
     ctx.save();
+    
+    // Path for Clipping (Rounded Corners)
+    const r = (A.radius || 0) * (w / 600); // Scale radius to canvas size
     ctx.beginPath();
-    ctx.rect(b,b,rw,rh);
+    if (ctx.roundRect) {
+      ctx.roundRect(b, b, rw, rh, r);
+    } else {
+      // Fallback path
+      ctx.moveTo(b + r, b);
+      ctx.arcTo(b + rw, b, b + rw, b + rh, r);
+      ctx.arcTo(b + rw, b + rh, b, b + rh, r);
+      ctx.arcTo(b, b + rh, b, b, r);
+      ctx.arcTo(b, b, b + rw, b, r);
+    }
     ctx.clip();
+
+    if (!isOriginal) {
+      ctx.filter = getFilterString(); // apply image adjustments
+    }
     ctx.drawImage(uploadedImg, sx, sy, sw, sh);
+    ctx.filter = 'none';
+
+    // 2. Vignette (Overlay on image area)
+    if (A.vignette > 0 && !isOriginal) {
+      const vGrd = ctx.createRadialGradient(w/2, h/2, rw/4, w/2, h/2, rw/1.2);
+      vGrd.addColorStop(0, 'rgba(0,0,0,0)');
+      vGrd.addColorStop(1, `rgba(0,0,0,${A.vignette * 0.8})`);
+      ctx.fillStyle = vGrd;
+      ctx.fillRect(b, b, rw, rh);
+    }
+
     ctx.restore();
   } else {
     ctx.fillStyle = '#1a1d2b';
@@ -901,41 +1240,55 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark) {
     ctx.fillText('No image uploaded', w/2, h/2);
   }
 
+  if (isOriginal) return; // Bypass template and text
+
   // 2. Overlay the template frame
   if (tImg) ctx.drawImage(tImg, 0, 0, w, h);
 
-  // 3. Add text
-  const mainTxt = document.getElementById('txtMain')?.value || '';
-  const subTxt  = document.getElementById('txtSub')?.value  || '';
-  const fs      = parseInt(document.getElementById('fontSize')?.value || 28);
-  const ff      = document.getElementById('fontFamily')?.value || 'Georgia, serif';
-  const op      = (parseInt(document.getElementById('textOpacity')?.value || 100))/100;
+  // 3. Add text layers
+  textLayers.forEach(layer => {
+    const mainTxt = layer.text || '';
+    const subTxt  = layer.subText || '';
+    const fs      = layer.fontSize;
+    const ff      = layer.fontFamily;
+    const op      = layer.opacity;
 
-  if (mainTxt || subTxt) {
-    const pad = Math.round(w*0.05);
-    const [vy, ha] = getTextAlign(textPos, pad, w, h, fs);
-    ctx.save();
-    ctx.globalAlpha = op;
+    if (mainTxt || subTxt) {
+      const pad = Math.round(w*0.05);
+      const [vy, ha] = getTextAlign(layer.pos, pad, w, h, fs);
+      ctx.save();
+      ctx.globalAlpha = op;
 
-    // shadow
-    ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
+      // shadow
+      ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
 
-    // main text
-    ctx.font = `bold ${fs}px ${ff}`;
-    ctx.fillStyle = textColor;
-    ctx.textAlign = ha;
-    const tx = ha==='left' ? pad : ha==='right' ? w-pad : w/2;
-    ctx.fillText(mainTxt, tx, vy);
+      // main text
+      ctx.font = `bold ${fs}px ${ff}`;
+      ctx.fillStyle = layer.color;
+      ctx.textAlign = ha;
+      
+      // Calculate base position
+      let tx = ha==='left' ? pad : ha==='right' ? w-pad : w/2;
+      let baseVy = vy;
 
-    // sub text
-    if (subTxt) {
-      ctx.font = `${Math.round(fs*0.58)}px ${ff}`;
-      ctx.fillStyle = textColor;
-      ctx.globalAlpha = op * 0.75;
-      ctx.fillText(subTxt, tx, vy + fs*1.1);
+      // Apply drag offset (scaled to current canvas size from 600x450 base)
+      const sx = w / 600;
+      const sy = h / 450;
+      tx += layer.dragOffset.x * sx;
+      baseVy += layer.dragOffset.y * sy;
+
+      ctx.fillText(mainTxt, tx, baseVy);
+
+      // sub text
+      if (subTxt) {
+        ctx.font = `${Math.round(fs*0.58)}px ${ff}`;
+        ctx.fillStyle = layer.color;
+        ctx.globalAlpha = op * 0.75;
+        ctx.fillText(subTxt, tx, baseVy + fs*1.1);
+      }
+      ctx.restore();
     }
-    ctx.restore();
-  }
+  });
 
   // 4. Watermark
   if (addWatermark) {
@@ -949,7 +1302,7 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark) {
         ctx.translate(x,y);
         ctx.rotate(-Math.PI/6);
         ctx.font = `bold ${Math.round(w*0.04)}px Inter, sans-serif`;
-        ctx.fillText('© CanvasFlow', 0, 0);
+        ctx.fillText('Hulk David', 0, 0);
         ctx.restore();
       }
     }
@@ -962,7 +1315,7 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark) {
     ctx.fillStyle='rgba(255,255,255,0.7)';
     ctx.font=`600 ${Math.round(w*0.022)}px Inter, sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('💧 WATERMARKED PREVIEW — canvasflow.demo', w/2, h-18);
+    ctx.fillText('💧 DESIGNED FOR HULK DAVID — canvasflow.demo', w/2, h-18);
     ctx.restore();
   }
 }
@@ -999,6 +1352,7 @@ function buildTemplateGrid() {
 }
 
 function selectTemplate(i) {
+  pushState();
   selectedTpl = i;
   document.querySelectorAll('.template-card').forEach((el,j)=>{
     el.classList.toggle('selected', j===i);
@@ -1022,30 +1376,85 @@ function renderEditor() {
   const canvas = document.getElementById('editorCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, false); });
+  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, false, false); });
 }
 
 function renderPreview() {
-  const canvas = document.getElementById('previewCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const p = PLATFORMS[activePlatform];
+  const pw = p.w, ph = p.h;
+  // Off-screen canvas at platform resolution
   const off = document.createElement('canvas');
-  off.width=800; off.height=600;
-  const ctx2 = off.getContext('2d');
-  TEMPLATES[selectedTpl].draw(ctx2, 800, 600);
-  const img = new Image();
-  img.onload = () => {
-    compositeOntoCanvas(ctx, 800, 600, img, true);
+  off.width=pw; off.height=ph;
+  const ctx = off.getContext('2d');
+  // Draw template at platform size
+  const tOff = document.createElement('canvas');
+  tOff.width=pw; tOff.height=ph;
+  TEMPLATES[selectedTpl].draw(tOff.getContext('2d'), pw, ph);
+  const tImg = new Image();
+  tImg.onload = () => {
+    compositeOntoCanvas(ctx, pw, ph, tImg, true, isComparing);
+    renderPlatformMockup(off, p);
   };
-  img.src = off.toDataURL();
+  tImg.src = tOff.toDataURL();
+  // Keep reference for download
+  window._previewOffscreen = off;
 
   // Summary
   document.getElementById('sumTemplate').textContent = TEMPLATES[selectedTpl].name;
   const cap = document.getElementById('txtMain').value;
-  document.getElementById('sumCaption').textContent = cap.length>18 ? cap.slice(0,18)+'…' : cap;
+  document.getElementById('sumCaption').textContent  = cap.length>18 ? cap.slice(0,18)+'\u2026' : cap;
   const ff = document.getElementById('fontFamily').value;
-  document.getElementById('sumFont').textContent = ff.split(',')[0].replace(/'/g,'');
-  document.getElementById('sumSize').textContent = document.getElementById('fontSize').value + 'px';
+  document.getElementById('sumFont').textContent     = ff.split(',')[0].replace(/'/g,'');
+  document.getElementById('sumSize').textContent     = document.getElementById('fontSize').value + 'px';
+  document.getElementById('sumPlatform').textContent = p.name;
+  document.getElementById('sumRes').textContent      = `${pw}\u00d7${ph}px`;
+  document.getElementById('platformNote').textContent = p.note;
+}
+
+function renderPlatformMockup(offCanvas, p) {
+  const mockup = document.getElementById('platformMockup');
+  mockup.innerHTML = '';
+
+  if (p.h > p.w) {
+    // Story (portrait) → phone frame
+    const wrap = document.createElement('div');
+    wrap.className = 'phone-frame';
+    const c = document.createElement('canvas');
+    c.width  = offCanvas.width;
+    c.height = offCanvas.height;
+    c.getContext('2d').drawImage(offCanvas, 0, 0);
+    wrap.appendChild(c);
+    mockup.appendChild(wrap);
+  } else {
+    // Feed / landscape → styled card mockup
+    const card = document.createElement('div');
+    card.className = 'post-frame';
+    // Header (fake profile row)
+    const hdr = document.createElement('div');
+    hdr.className = 'post-header';
+    hdr.innerHTML = `<div class="post-avatar">${p.icon}</div><div class="post-username">@canvasflow.demo</div>`;
+    card.appendChild(hdr);
+    // Canvas
+    const c = document.createElement('canvas');
+    c.width  = offCanvas.width;
+    c.height = offCanvas.height;
+    c.getContext('2d').drawImage(offCanvas, 0, 0);
+    card.appendChild(c);
+    // Footer
+    const ftr = document.createElement('div');
+    ftr.className = 'post-footer';
+    ftr.textContent = `\u2665\ufe0f 2,847  \ud83d\udcac 143 comments  🔁 Share`;
+    card.appendChild(ftr);
+    mockup.appendChild(card);
+  }
+}
+
+function setPlatform(key) {
+  activePlatform = key;
+  // Update tab buttons
+  document.querySelectorAll('.plt-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('plt-'+key)?.classList.add('active');
+  renderPreview();
 }
 
 /* ===================================================
@@ -1057,7 +1466,11 @@ function gotoStep(n) {
   document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
   updateStepper();
   if (n===1) buildTemplateGrid();
-  if (n===2) setTimeout(renderEditor, 60);
+  if (n===2) {
+    buildLayersList();
+    syncLayerUI();
+    setTimeout(renderEditor, 60);
+  }
   if (n===3) setTimeout(renderPreview, 60);
   window.scrollTo({top:120, behavior:'smooth'});
 }
@@ -1113,37 +1526,442 @@ function removeImage() {
 }
 
 /* ===================================================
-   TEXT CONTROLS
+   HISTORY & LAYERS
 =================================================== */
+function pushState() {
+  // Capture current state snapshot
+  const state = {
+    filters: { ...F },
+    template: selectedTpl,
+    layers: JSON.parse(JSON.stringify(textLayers)), // Deep copy
+    activeIdx: activeLayerIndex
+  };
+  
+  // If we're not at the end of the stack, clear the "redo" part
+  if (historyIndex < historyStack.length - 1) {
+    historyStack = historyStack.slice(0, historyIndex + 1);
+  }
+  
+  historyStack.push(state);
+  // Optional: cap historical stack size
+  if (historyStack.length > 50) historyStack.shift();
+  else historyIndex++;
+}
+
+function undo() {
+  if (historyIndex > 0) {
+    historyIndex--;
+    applyHistoryState(historyStack[historyIndex]);
+  } else {
+    showToast('Nothing to undo');
+  }
+}
+
+function redo() {
+  if (historyIndex < historyStack.length - 1) {
+    historyIndex++;
+    applyHistoryState(historyStack[historyIndex]);
+  } else {
+    showToast('Nothing to redo');
+  }
+}
+
+function applyHistoryState(state) {
+  Object.assign(F, state.filters);
+  selectedTpl = state.template;
+  textLayers = JSON.parse(JSON.stringify(state.layers));
+  activeLayerIndex = state.activeIdx;
+  
+  // Sync UI
+  syncFiltersUI();
+  syncLayerUI();
+  buildLayersList();
+  renderEditor();
+}
+
+function syncFiltersUI() {
+  ['brightness','contrast','saturation','blur','grayscale','sepia'].forEach(k => {
+    const el = document.getElementById('f_' + k);
+    const lb = document.getElementById('fl_' + k);
+    if (el) el.value = F[k];
+    if (lb) lb.textContent = F[k];
+  });
+  // Sync Radius & Vignette
+  const rEl = document.getElementById('a_radius');
+  const rlEl = document.getElementById('al_radius');
+  if (rEl) rEl.value = A.radius;
+  if (rlEl) rlEl.textContent = A.radius;
+  
+  const vEl = document.getElementById('a_vignette');
+  const vlEl = document.getElementById('al_vignette');
+  if (vEl) vEl.value = A.vignette * 100;
+  if (vlEl) vlEl.textContent = Math.round(A.vignette * 100);
+}
+
+function randomizeFilters() {
+  pushState();
+  F.brightness = 80 + Math.random() * 60;
+  F.contrast   = 90 + Math.random() * 50;
+  F.saturation = 50 + Math.random() * 150;
+  F.blur       = Math.random() < 0.7 ? 0 : Math.random() * 3;
+  F.grayscale  = Math.random() < 0.8 ? 0 : Math.random() * 50;
+  F.sepia      = Math.random() < 0.8 ? 0 : Math.random() * 40;
+  
+  A.radius     = Math.random() < 0.5 ? 0 : Math.random() * 40;
+  A.vignette   = Math.random() < 0.4 ? 0 : Math.random() * 0.6;
+  
+  syncFiltersUI();
+  renderEditor();
+  showToast('🎲 Randomized!');
+}
+
+function createConfetti() {
+  const colors = ['#7c5cfc', '#ff6b8a', '#ffd700', '#56cffc', '#45e0a0'];
+  for (let i = 0; i < 60; i++) {
+    const div = document.createElement('div');
+    div.className = 'confetti';
+    div.style.left = Math.random() * 100 + 'vw';
+    div.style.top = -20 + 'px';
+    div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    div.style.transform = `rotate(${Math.random() * 360}deg)`;
+    document.body.appendChild(div);
+    
+    const duration = 2000 + Math.random() * 3000;
+    const anim = div.animate([
+      { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 },
+      { transform: `translate3d(${(Math.random()-0.5)*200}px, ${window.innerHeight + 20}px, 0) rotate(${Math.random()*1000}deg)`, opacity: 0 }
+    ], {
+      duration: duration,
+      easing: 'cubic-bezier(0, .9, .57, 1)'
+    });
+    anim.onfinish = () => div.remove();
+  }
+}
+
+// Global keyboard shortcuts
+window.addEventListener('keydown', e => {
+  const isInput = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+  
+  if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    undo();
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === 'y' || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z')) {
+    e.preventDefault();
+    redo();
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    downloadImage();
+  }
+  
+  // Navigation
+  if (!isInput && ['1','2','3','4'].includes(e.key)) {
+    gotoStep(parseInt(e.key) - 1);
+  }
+  
+  // Delete layer
+  if (!isInput && (e.key === 'Delete' || e.key === 'Backspace')) {
+    deleteTextLayer(e, activeLayerIndex);
+  }
+});
+
+function addTextLayer() {
+  pushState();
+  const newLayer = {
+    id: Date.now(),
+    text: 'New Text',
+    subText: '',
+    color: '#ffffff',
+    pos: 'top-center',
+    dragOffset: { x: 0, y: 0 },
+    fontSize: 24,
+    fontFamily: 'Georgia, serif',
+    opacity: 1
+  };
+  textLayers.push(newLayer);
+  activeLayerIndex = textLayers.length - 1;
+  buildLayersList();
+  syncLayerUI();
+  renderEditor();
+}
+
+function deleteTextLayer(e, idx) {
+  e.stopPropagation();
+  if (textLayers.length <= 1) {
+    showToast('Must keep at least one layer');
+    return;
+  }
+  pushState();
+  textLayers.splice(idx, 1);
+  if (activeLayerIndex >= textLayers.length) activeLayerIndex = textLayers.length - 1;
+  buildLayersList();
+  syncLayerUI();
+  renderEditor();
+}
+
+function switchLayer(idx) {
+  activeLayerIndex = idx;
+  buildLayersList();
+  syncLayerUI();
+}
+
+function buildLayersList() {
+  const list = document.getElementById('layersList');
+  if (!list) return;
+  list.innerHTML = '';
+  textLayers.forEach((layer, i) => {
+    const isSticker = !!layer.isSticker;
+    const item = document.createElement('div');
+    item.className = 'layer-item' + (i === activeLayerIndex ? ' selected' : '');
+    item.onclick = () => switchLayer(i);
+    item.innerHTML = `
+      <div class="layer-info">
+        <div class="layer-name">${isSticker ? '✨ Emoji Sticker' : (layer.text || 'Untitled Text')}</div>
+        <div class="layer-sub">${isSticker ? layer.text : (layer.fontFamily.split(',')[0] + ' · ' + layer.fontSize + 'px')}</div>
+      </div>
+      <div class="layer-del" onclick="deleteTextLayer(event, ${i})">✕</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function syncLayerUI() {
+  const l = textLayers[activeLayerIndex];
+  if (!l) return;
+  
+  const isSticker = !!l.isSticker;
+  const mainInput = document.getElementById('txtMain');
+  const mainLabel = document.getElementById('mainLabel');
+  const subWrap = document.getElementById('txtSub').parentElement;
+  
+  mainInput.value = l.text;
+  document.getElementById('txtSub').value = l.subText;
+  
+  // Adjust UI labels if sticker
+  if (isSticker) {
+    if (mainLabel) mainLabel.textContent = 'Emoji Sticker';
+    subWrap.style.display = 'none';
+  } else {
+    if (mainLabel) mainLabel.textContent = 'Caption';
+    subWrap.style.display = 'block';
+  }
+
+  document.getElementById('fontFamily').value = l.fontFamily;
+  document.getElementById('fontSize').value = l.fontSize;
+  document.getElementById('sizeVal').textContent = l.fontSize;
+  document.getElementById('textOpacity').value = l.opacity * 100;
+  document.getElementById('opacityVal').textContent = Math.round(l.opacity * 100);
+  
+  // Sync Color
+  document.getElementById('customColor').value = l.color;
+  document.querySelectorAll('.color-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.color === l.color);
+  });
+}
+
+function updateActiveLayer(key, val) {
+  // Save state on start of interaction if needed, or periodically
+  // For sliders/text, we'll save on 'change' but update on 'input'
+  textLayers[activeLayerIndex][key] = val;
+  renderEditor();
+}
+
 function setColor(el) {
-  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  textColor = el.dataset.color;
-  document.getElementById('customColor').value = textColor;
+  pushState();
+  const color = el.dataset.color;
+  textLayers[activeLayerIndex].color = color;
+  syncLayerUI();
   renderEditor();
 }
+
 function customColorChange(el) {
-  textColor = el.value;
-  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  // Save state only on finish? Sliders are messy. 
+  // Let's just update for now.
+  textLayers[activeLayerIndex].color = el.value;
   renderEditor();
 }
+
 function setPosBtn(el, pos) {
+  pushState();
   document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  textPos = pos;
+  textLayers[activeLayerIndex].pos = pos;
+  textLayers[activeLayerIndex].dragOffset = { x: 0, y: 0 };
   renderEditor();
 }
+
+/* ===================================================
+   TEXT CONTROLS (Updated)
+=================================================== */
+
+/* ===================================================
+   CANVAS INTERACTION (Dragging)
+=================================================== */
+function initCanvasInteractions() {
+  const canvas = document.getElementById('editorCanvas');
+  if (!canvas) return;
+
+  canvas.addEventListener('mousedown', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    // Find if clicking near ANY text layer
+    let foundIdx = -1;
+    for (let i = textLayers.length - 1; i >= 0; i--) {
+      const l = textLayers[i];
+      const fs = l.fontSize;
+      const pad = Math.round(600 * 0.05);
+      const [vy, ha] = getTextAlign(l.pos, pad, 600, 450, fs);
+      const tx = (ha==='left' ? pad : ha==='right' ? 600-pad : 300) + l.dragOffset.x;
+      const ty = vy + l.dragOffset.y;
+
+      const hitLimit = l.isSticker ? (fs * 0.8) : 60;
+      if (Math.hypot(mx - tx, my - ty) < hitLimit) {
+        foundIdx = i;
+        break;
+      }
+    }
+
+    if (foundIdx !== -1) {
+      pushState();
+      switchLayer(foundIdx); // Select the clicked layer
+      isDraggingText = true;
+      dragStart = { x: mx, y: my };
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!isDraggingText) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    const l = textLayers[activeLayerIndex];
+    l.dragOffset.x += (mx - dragStart.x);
+    l.dragOffset.y += (my - dragStart.y);
+    dragStart = { x: mx, y: my };
+    renderEditor();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDraggingText) {
+      isDraggingText = false;
+      canvas.style.cursor = 'default';
+    }
+  });
+
+  // Hover cursor
+  canvas.addEventListener('mousemove', e => {
+    if (isDraggingText) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    let overSomething = false;
+    for (const l of textLayers) {
+      const fs = l.fontSize;
+      const pad = Math.round(600 * 0.05);
+      const [vy, ha] = getTextAlign(l.pos, pad, 600, 450, fs);
+      const tx = (ha==='left' ? pad : ha==='right' ? 600-pad : 300) + l.dragOffset.x;
+      const ty = vy + l.dragOffset.y;
+      
+      const hitLimit = l.isSticker ? (fs * 0.8) : 60;
+      if (Math.hypot(mx - tx, my - ty) < hitLimit) {
+        overSomething = true;
+        break;
+      }
+    }
+    canvas.style.cursor = overSomething ? 'grab' : 'default';
+  });
+}
+
+/* ===================================================
+   EMOJI
+=================================================== */
+function toggleEmojiPanel() {
+  document.getElementById('emojiPanel').classList.toggle('open');
+}
+function setEmojiTarget(t) {
+  emojiTarget = t;
+  document.getElementById('epMain').classList.toggle('active', t==='main');
+  document.getElementById('epSub').classList.toggle('active',  t==='sub');
+  document.getElementById('epSticker').classList.toggle('active', t==='sticker');
+}
+function insertEmoji(emoji) {
+  if (emojiTarget === 'sticker') {
+    // Add as a new layer instead of injecting into text
+    pushState();
+    const newLayer = {
+      id: Date.now(),
+      text: emoji,
+      subText: '',
+      color: '#ffffff',
+      pos: 'mid-center',
+      dragOffset: { x: 0, y: 0 },
+      fontSize: 80, // Default sticker size
+      fontFamily: 'Georgia, serif',
+      opacity: 1,
+      isSticker: true
+    };
+    textLayers.push(newLayer);
+    activeLayerIndex = textLayers.length - 1;
+    buildLayersList();
+    syncLayerUI();
+    renderEditor();
+    showToast('✨ Sticker added!');
+    return;
+  }
+
+  const l = textLayers[activeLayerIndex];
+  const id = emojiTarget === 'main' ? 'txtMain' : 'txtSub';
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  
+  pushState(); 
+  const pos = inp.selectionStart || inp.value.length;
+  inp.value = inp.value.slice(0, pos) + emoji + inp.value.slice(pos);
+  
+  // Update state
+  if (emojiTarget === 'main') l.text = inp.value;
+  else l.subText = inp.value;
+  
+  inp.focus();
+  renderEditor();
+  buildLayersList(); // Refresh layer preview name
+}
+function initEmojiList() {
+  const emojis = "😀 😂 🥰 😍 🔥 ✨ 💯 🎉 🙌 👏 💪 🤩 😎 🥳 💫 ⭐ 🌟 🏆 💎 🌸 🌺 🌈 ☀️ 🌙 ❤️ 💜 💙 🖤 🤍 👑 🎨 📸 🎬 💡 🚀 🌍 🎵 🎶 💃 🕺 🤝 👋 ✌️ 🤞 👍 ❤️‍🔥 💖 🌻 🍀".split(' ');
+  const list = document.getElementById('emojiList');
+  if(!list) return;
+  list.innerHTML = emojis.filter(Boolean).map(e => `<span class="ep-emoji" onclick="insertEmoji('${e}')">${e}</span>`).join('');
+}
+// Close emoji panel when clicking outside
+document.addEventListener('click', e => {
+  const panel = document.getElementById('emojiPanel');
+  if (panel && !panel.contains(e.target) && !e.target.closest('.emoji-wrap')) {
+    panel.classList.remove('open');
+  }
+});
 
 /* ===================================================
    DOWNLOAD
 =================================================== */
 function downloadImage() {
-  const canvas = document.getElementById('previewCanvas');
-  const link   = document.createElement('a');
-  link.download = 'canvasflow-preview.png';
-  link.href     = canvas.toDataURL('image/png');
+  // Use the latest rendered offscreen canvas (platform resolution)
+  const src = window._previewOffscreen;
+  if (!src) { showToast('Preview not ready yet'); return; }
+  
+  const ext = EXPORT.format.split('/')[1];
+  const link = document.createElement('a');
+  link.download = `canvasflow-${activePlatform}-preview.${ext === 'jpeg' ? 'jpg' : ext}`;
+  link.href = src.toDataURL(EXPORT.format, EXPORT.quality);
   link.click();
-  showToast('⬇️ Downloading...');
+  
+  showToast('✨ Success! Downloading...');
+  createConfetti();
 }
 
 /* ===================================================
@@ -1162,6 +1980,8 @@ function showToast(msg) {
    INIT
 =================================================== */
 buildTemplateGrid();
+initEmojiList();
+initCanvasInteractions();
 </script>
 </body>
 </html>
