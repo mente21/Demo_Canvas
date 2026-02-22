@@ -807,54 +807,68 @@ const TEMPLATES = [
 ];
 
 function drawSunset(ctx, w, h) {
-  // Gradient border + warm vignette
+  // Draw ONLY the gradient border ring — center stays transparent
+  const b = Math.round(w*0.045);
   const g = ctx.createLinearGradient(0,0,w,h);
   g.addColorStop(0, '#ff6b35'); g.addColorStop(1, '#ffd700');
+  ctx.save();
+  // Fill full canvas with gradient, then cut out inner rect to leave a ring
   ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-  const b = Math.round(w*0.045);
-  ctx.clearRect(b,b,w-b*2,h-b*2);
-  ctx.fillStyle = '#000'; ctx.fillRect(b,b,w-b*2,h-b*2);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
 }
 function drawOcean(ctx, w, h) {
+  const b = Math.round(w*0.04);
   const g = ctx.createLinearGradient(0,0,w,h);
   g.addColorStop(0,'#0077b6'); g.addColorStop(1,'#00b4d8');
+  ctx.save();
   ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-  const b = Math.round(w*0.04);
-  ctx.clearRect(b,b,w-b*2,h-b*2);
-  ctx.fillStyle='#000'; ctx.fillRect(b,b,w-b*2,h-b*2);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
 }
 function drawNeon(ctx, w, h) {
-  ctx.fillStyle = '#0b0d14'; ctx.fillRect(0,0,w,h);
   const b = Math.round(w*0.04);
-  ctx.shadowColor='#7c5cfc'; ctx.shadowBlur=12;
-  ctx.strokeStyle='#7c5cfc'; ctx.lineWidth=b;
-  ctx.strokeRect(b/2,b/2,w-b,h-b);
-  ctx.shadowColor='#c56cfc'; ctx.shadowBlur=20;
-  ctx.strokeStyle='#c56cfc'; ctx.lineWidth=2;
-  ctx.strokeRect(b*1.6,b*1.6,w-b*3.2,h-b*3.2);
+  ctx.save();
+  // Draw only a dark border ring
+  ctx.fillStyle = '#0b0d14'; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  // Neon inner stroke on top
+  ctx.shadowColor='#7c5cfc'; ctx.shadowBlur=18;
+  ctx.strokeStyle='#7c5cfc'; ctx.lineWidth=3;
+  ctx.strokeRect(b, b, w-b*2, h-b*2);
+  ctx.shadowColor='#c56cfc'; ctx.shadowBlur=24;
+  ctx.strokeStyle='#c56cfc'; ctx.lineWidth=1.5;
+  ctx.strokeRect(b+4, b+4, w-b*2-8, h-b*2-8);
   ctx.shadowBlur=0;
+  ctx.restore();
 }
 function drawMinimal(ctx, w, h) {
-  ctx.fillStyle='#18191f'; ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
   const b = Math.round(w*0.04);
-  ctx.strokeRect(b,b,w-b*2,h-b*2);
+  ctx.save();
+  // Thin dark border ring
+  ctx.fillStyle='rgba(24,25,31,0.92)'; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1;
+  ctx.strokeRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
 }
 function drawForest(ctx, w, h) {
+  const b = Math.round(w*0.04);
   const g = ctx.createLinearGradient(0,0,w,h);
   g.addColorStop(0,'#134e25'); g.addColorStop(1,'#45e0a0');
+  ctx.save();
   ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-  const b = Math.round(w*0.04);
-  ctx.clearRect(b,b,w-b*2,h-b*2);
-  ctx.fillStyle='#000'; ctx.fillRect(b,b,w-b*2,h-b*2);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
 }
 function drawVintage(ctx, w, h) {
+  const b = Math.round(w*0.05);
   const g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w*0.7);
   g.addColorStop(0,'#c9a95c'); g.addColorStop(1,'#5c3b18');
+  ctx.save();
   ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-  const b = Math.round(w*0.05);
-  ctx.clearRect(b,b,w-b*2,h-b*2);
-  ctx.fillStyle='#000'; ctx.fillRect(b,b,w-b*2,h-b*2);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
 }
 
 /* ===================================================
