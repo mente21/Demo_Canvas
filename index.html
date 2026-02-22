@@ -1,146 +1,693 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>CanvasFlow — Pro Photo Editor</title>
-  <meta name="description" content="Upload, crop, filter, add text and download — a premium canvas photo editor demo."/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CanvasFlow — Photo Editor</title>
+  <meta name="description" content="A beautiful canvas-based photo editor: upload, overlay templates, add text, and preview with watermark."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b0d14;
+      --surface:   #12151f;
+      --card:      #181c28;
+      --border:    rgba(255,255,255,0.07);
+      --accent1:   #7c5cfc;
+      --accent2:   #c56cfc;
+      --accent3:   #56cffc;
+      --glow:      rgba(124,92,252,0.35);
+      --text:      #e8eaf5;
+      --muted:     #6b708d;
+      --success:   #45e0a0;
+      --danger:    #ff6b8a;
+      --radius:    16px;
+      --r-sm:      10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(124,92,252,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(197,108,252,0.10) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(86,207,252,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 64px;
+      background: rgba(11,13,20,0.75);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 0 16px var(--glow);
+    }
+    .nav-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      padding: 3px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,92,252,0.12);
+      border: 1px solid rgba(124,92,252,0.3);
+      border-radius: 99px;
+      padding: 5px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent2);
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.5px;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2) 70%, var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── Stepper ── */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      color: var(--muted);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .step-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: color 0.3s;
+      white-space: nowrap;
+    }
+    .step-line {
+      width: 48px;
+      height: 2px;
+      background: var(--border);
+      margin: 0 6px;
+      transition: background 0.4s;
+      flex-shrink: 0;
+    }
+    .step-item.active .step-num {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 0 18px var(--glow);
+    }
+    .step-item.active .step-label { color: var(--text); }
+    .step-item.done .step-num {
+      background: var(--success);
+      border-color: transparent;
+      color: #0b0d14;
+    }
+    .step-item.done .step-label { color: var(--success); }
+    .step-line.done { background: var(--success); }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: none;
+      animation: fadeUp 0.4s ease;
+    }
+    .panel.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .panel-sub {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.75rem;
+    }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 2px dashed rgba(124,92,252,0.4);
+      border-radius: var(--radius);
+      padding: 3.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent1);
+      background: rgba(124,92,252,0.06);
+    }
+    .upload-zone input { display: none; }
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .upload-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .upload-hint { color: var(--muted); font-size: 0.875rem; }
+    .upload-preview-wrap {
+      display: none;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    .upload-preview-wrap.show { display: flex; }
+    .preview-thumb {
+      width: 64px; height: 64px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 2px solid var(--accent1);
+    }
+    .preview-info { flex: 1; }
+    .preview-name { font-weight: 600; font-size: 0.9rem; }
+    .preview-size { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+    .preview-remove {
+      background: rgba(255,107,138,0.12);
+      border: 1px solid rgba(255,107,138,0.25);
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .preview-remove:hover { background: rgba(255,107,138,0.22); }
+
+    /* ── Templates ── */
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .template-card {
+      border-radius: var(--r-sm);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .template-card:hover { border-color: var(--accent1); transform: translateY(-3px); }
+    .template-card.selected {
+      border-color: var(--accent1);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.25);
+    }
+    .template-card canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4/3;
+    }
+    .template-name {
+      padding: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: center;
+      background: rgba(0,0,0,0.4);
+    }
+    .template-check {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--accent1);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: #fff;
+      box-shadow: 0 0 10px var(--glow);
+    }
+    .template-card.selected .template-check { display: flex; }
+
+    /* ── Text Editor ── */
+    .text-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 660px) { .text-layout { grid-template-columns: 1fr; } }
+
+    .controls-col { display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .field-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      padding: 0.6rem 0.9rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .field-input:focus { border-color: var(--accent1); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .font-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .color-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .color-swatch {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .color-swatch:hover, .color-swatch.active {
+      border-color: #fff;
+      transform: scale(1.15);
+    }
+    input[type="color"].field-input {
+      height: 42px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .canvas-wrap {
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      position: relative;
+      background: #000;
+    }
+    .canvas-wrap canvas {
+      display: block;
+      width: 100%;
+      image-rendering: auto;
+    }
+
+    /* ── Slider ── */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--surface);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent1);
+      box-shadow: 0 0 8px var(--glow);
+    }
+
+    /* ── Position Picker ── */
+    .pos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      width: 120px;
+    }
+    .pos-btn {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pos-btn:hover { border-color: var(--accent1); }
+    .pos-btn.active {
+      background: var(--accent1);
+      border-color: var(--accent1);
+      box-shadow: 0 0 10px var(--glow);
+    }
+
+    /* ── Preview ── */
+    .preview-layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(220px, 300px);
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 720px) { .preview-layout { grid-template-columns: 1fr; } }
+
+    .preview-main-canvas {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .preview-main-canvas canvas { display: block; width: 100%; }
+
+    .preview-side {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 1rem;
+    }
+    .info-card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row span:first-child { color: var(--muted); }
+    .info-row span:last-child { font-weight: 600; }
+
+    .watermark-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(124,92,252,0.08);
+      border: 1px solid rgba(124,92,252,0.2);
+      border-radius: var(--r-sm);
+      padding: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .watermark-note .wnote-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: var(--r-sm);
+      padding: 0.7rem 1.4rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px var(--glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--glow); }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent1); color: var(--accent1); }
+    .btn-success {
+      background: linear-gradient(135deg, #2dd4a0, #20b98a);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(45,212,160,0.3);
+    }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,212,160,0.4); }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Download btn ── */
+    .download-wrap {
+      display: flex;
+      gap: 0.75rem;
+      flex-direction: column;
+    }
+    .btn-download {
+      width: 100%;
+      justify-content: center;
+      padding: 0.85rem;
+    }
+    .btn-outline-accent {
+      background: transparent;
+      border: 1.5px solid var(--accent1);
+      color: var(--accent1);
+    }
+    .btn-outline-accent:hover { background: rgba(124,92,252,0.1); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 99px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  </style>
 </head>
 <body>
 
+<!-- ── NAVBAR ── -->
 <nav>
   <div class="logo">
     <div class="logo-icon">🎨</div>
     <span>CanvasFlow</span>
   </div>
-  <span class="nav-badge">✦ Pro Editor Demo</span>
+  <span class="nav-badge">✦ Photo Editor Demo</span>
 </nav>
 
+<!-- ── MAIN PAGE ── -->
 <div class="page">
 
   <!-- Hero -->
   <div class="hero">
-    <div class="pill">✦ Upwork Showcase &nbsp;·&nbsp; Client Demo</div>
-    <h1>Edit. Crop. Filter.<br>Download.</h1>
-    <p>A full canvas photo editor with crop, filters, multi-layer text, social media presets and watermark preview — all in the browser.</p>
+    <div class="hero-pill">✦ Demo Preview &nbsp;·&nbsp; Upwork Showcase</div>
+    <h1>Design In Seconds,<br>Effortlessly.</h1>
+    <p>Upload your photo, pick a frame template, add your custom text, then download with a watermark preview — all in the browser.</p>
   </div>
 
-  <!-- Stepper: 5 steps -->
-  <div class="stepper">
-    <div class="si active" id="si-0" onclick="jumpTo(0)"><div class="sn" id="sn-0">1</div><div class="sl">Upload</div></div>
-    <div class="sline" id="sl-0"></div>
-    <div class="si" id="si-1" onclick="jumpTo(1)"><div class="sn" id="sn-1">2</div><div class="sl">Template</div></div>
-    <div class="sline" id="sl-1"></div>
-    <div class="si" id="si-2" onclick="jumpTo(2)"><div class="sn" id="sn-2">3</div><div class="sl">Crop & Filters</div></div>
-    <div class="sline" id="sl-2"></div>
-    <div class="si" id="si-3" onclick="jumpTo(3)"><div class="sn" id="sn-3">4</div><div class="sl">Text & Size</div></div>
-    <div class="sline" id="sl-3"></div>
-    <div class="si" id="si-4" onclick="jumpTo(4)"><div class="sn" id="sn-4">5</div><div class="sl">Preview</div></div>
+  <!-- Stepper -->
+  <div class="stepper" id="stepper">
+    <div class="step-item active" id="si-0" onclick="jumpTo(0)">
+      <div class="step-num" id="sn-0">1</div>
+      <div class="step-label">Upload Photo</div>
+    </div>
+    <div class="step-line" id="sl-0"></div>
+    <div class="step-item" id="si-1" onclick="jumpTo(1)">
+      <div class="step-num" id="sn-1">2</div>
+      <div class="step-label">Choose Template</div>
+    </div>
+    <div class="step-line" id="sl-1"></div>
+    <div class="step-item" id="si-2" onclick="jumpTo(2)">
+      <div class="step-num" id="sn-2">3</div>
+      <div class="step-label">Add Text</div>
+    </div>
+    <div class="step-line" id="sl-2"></div>
+    <div class="step-item" id="si-3" onclick="jumpTo(3)">
+      <div class="step-num" id="sn-3">4</div>
+      <div class="step-label">Preview & Download</div>
+    </div>
   </div>
 
-  <!-- STEP 1: UPLOAD -->
+  <!-- ── STEP 1: UPLOAD ── -->
   <div class="panel active" id="panel-0">
-    <div class="pt">📁 Upload Your Photo</div>
-    <div class="ps">Drag & drop or click to browse · JPG, PNG, WEBP supported</div>
-    <div class="upz" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <div class="panel-title">📁 Upload Your Photo</div>
+    <div class="panel-sub">Drag & drop or click to browse · JPG, PNG, WEBP supported</div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
       <input type="file" id="fileInput" accept="image/*">
-      <span class="upicon">☁️</span>
-      <div class="upt">Drop your image here</div>
-      <div class="uph">or click to browse files · any resolution accepted</div>
+      <span class="upload-icon">☁️</span>
+      <div class="upload-title">Drop your image here</div>
+      <div class="upload-hint">or click to browse files</div>
     </div>
-    <div class="upw" id="upw">
-      <img class="uth" id="previewThumb" src="" alt="">
-      <div class="upi"><div class="upn" id="previewName">photo.jpg</div><div class="ups" id="previewSize">0 KB</div></div>
-      <button class="uprm" onclick="removeImage()">✕ Remove</button>
+
+    <div class="upload-preview-wrap" id="uploadPreviewWrap">
+      <img class="preview-thumb" id="previewThumb" src="" alt="preview">
+      <div class="preview-info">
+        <div class="preview-name" id="previewName">photo.jpg</div>
+        <div class="preview-size" id="previewSize">0 KB</div>
+      </div>
+      <button class="preview-remove" onclick="removeImage()">✕ Remove</button>
     </div>
-    <div class="brow"><button class="btn btn-p" onclick="gotoStep(1)">Next: Choose Template →</button></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="gotoStep(1)">Next: Choose Template →</button>
+    </div>
   </div>
 
-  <!-- STEP 2: TEMPLATE -->
+  <!-- ── STEP 2: TEMPLATE ── -->
   <div class="panel" id="panel-1">
-    <div class="pt">🖼 Choose a Frame Template</div>
-    <div class="ps">Select how your photo will be framed — changes reflect live in later steps</div>
-    <div class="tgrid" id="tgrid"></div>
-    <div class="brow">
-      <button class="btn btn-s" onclick="gotoStep(0)">← Back</button>
-      <button class="btn btn-p" onclick="gotoStep(2)">Next: Crop & Filters →</button>
+    <div class="panel-title">🖼 Choose a Frame Template</div>
+    <div class="panel-sub">Select how your photo will be framed and styled</div>
+
+    <div class="templates-grid" id="templatesGrid"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="gotoStep(0)">← Back</button>
+      <button class="btn btn-primary" onclick="gotoStep(2)">Next: Add Text →</button>
     </div>
   </div>
 
-  <!-- STEP 3: CROP & FILTERS -->
+  <!-- ── STEP 3: TEXT ── -->
   <div class="panel" id="panel-2">
-    <div class="pt">✂️ Crop & Filters</div>
-    <div class="ps">Crop your image, adjust colors, apply effects — all updates are live</div>
+    <div class="panel-title">✏️ Add Your Text</div>
+    <div class="panel-sub">Customize your caption, font, size and color in real-time</div>
 
-    <!-- Crop controls -->
-    <div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-s btn-sm" id="cropBtn" onclick="toggleCrop()">✂️ Crop Photo</button>
-      <button class="btn btn-s btn-sm" onclick="resetCrop()">↺ Reset Crop</button>
-      <span style="color:var(--muted);font-size:.78rem">Drag handles on canvas to crop</span>
-    </div>
-
-    <!-- Canvas + Filters side by side -->
-    <div style="display:grid;grid-template-columns:1fr 300px;gap:1.4rem">
-      <div class="cwrap" style="position:relative">
-        <canvas id="filterCanvas" width="600" height="450"></canvas>
-        <div class="drag-hint">✂️ crop handles · live preview</div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:.9rem">
-        <div class="filters-grid">
-          <div><div class="fl">Brightness: <span id="fl_brightness">100</span>%</div><input type="range" id="f_brightness" min="0" max="200" value="100"></div>
-          <div><div class="fl">Contrast: <span id="fl_contrast">100</span>%</div><input type="range" id="f_contrast" min="0" max="200" value="100"></div>
-          <div><div class="fl">Saturation: <span id="fl_saturation">100</span>%</div><input type="range" id="f_saturation" min="0" max="200" value="100"></div>
-          <div><div class="fl">Blur: <span id="fl_blur">0</span>px</div><input type="range" id="f_blur" min="0" max="20" value="0"></div>
-          <div><div class="fl">Grayscale: <span id="fl_grayscale">0</span>%</div><input type="range" id="f_grayscale" min="0" max="100" value="0"></div>
-          <div><div class="fl">Sepia: <span id="fl_sepia">0</span>%</div><input type="range" id="f_sepia" min="0" max="100" value="0"></div>
-          <div><div class="fl">Vignette: <span id="fl_vignette">0</span>%</div><input type="range" id="f_vignette" min="0" max="100" value="0"></div>
-          <div><div class="fl">Rounded Corners: <span id="fl_corners">0</span>%</div><input type="range" id="f_corners" min="0" max="100" value="0"></div>
-        </div>
-        <button class="btn btn-s btn-sm" onclick="Object.keys(F).forEach(k=>F[k]=(['brightness','contrast','saturation'].includes(k)?100:0));syncFiltersUI();renderEditor();showToast('Filters reset')">↺ Reset All Filters</button>
-      </div>
-    </div>
-
-    <div class="brow">
-      <button class="btn btn-s" onclick="gotoStep(1)">← Back</button>
-      <button class="btn btn-p" onclick="gotoStep(3)">Next: Text & Size →</button>
-    </div>
-  </div>
-
-  <!-- STEP 4: TEXT & SIZE -->
-  <div class="panel" id="panel-3">
-    <div class="pt">✏️ Text & Canvas Size</div>
-    <div class="ps">Choose output size, drag text on canvas, or use position grid</div>
-
-    <!-- Size Presets -->
-    <div class="fl" style="margin-bottom:.4rem">Output Size / Aspect Ratio</div>
-    <div id="presetRow" class="presets"></div>
-
-    <div class="tlay">
-      <div class="ccol">
-        <!-- Undo/Redo -->
-        <div class="undo-row">
-          <button id="btn-undo" class="btn btn-s btn-sm" onclick="undo()">↩ Undo</button>
-          <button id="btn-redo" class="btn btn-s btn-sm" onclick="redo()">↪ Redo</button>
-        </div>
-
-        <!-- Text Layers -->
+    <div class="text-layout">
+      <!-- Controls -->
+      <div class="controls-col">
         <div>
-          <div class="fl">Text Layers</div>
-          <div id="tlList" class="tl-list"></div>
-          <button class="btn btn-s btn-sm" onclick="addTextLayer()">+ Add Layer</button>
+          <div class="field-label">Main Caption</div>
+          <input class="field-input" id="txtMain" type="text" placeholder="Your headline text…" value="Your Story Here" oninput="renderEditor()">
         </div>
-
-        <div><div class="fl">Main Caption</div><input class="fi" id="txtMain" type="text" placeholder="Your headline…"></div>
-        <div><div class="fl">Sub Caption</div><input class="fi" id="txtSub" type="text" placeholder="Short tagline…"></div>
-
-        <div class="frow">
+        <div>
+          <div class="field-label">Sub Caption</div>
+          <input class="field-input" id="txtSub" type="text" placeholder="A short tagline…" value="Captured in a moment" oninput="renderEditor()">
+        </div>
+        <div class="font-row">
           <div>
-            <div class="fl">Font</div>
-            <select class="fi" id="fontFamily">
+            <div class="field-label">Font Family</div>
+            <select class="field-input" id="fontFamily" onchange="renderEditor()">
               <option value="Georgia, serif">Georgia</option>
               <option value="'Arial', sans-serif">Arial</option>
               <option value="'Verdana', sans-serif">Verdana</option>
@@ -150,103 +697,83 @@
             </select>
           </div>
           <div>
-            <div class="fl">Size: <span id="sizeVal">28</span>px</div>
-            <input type="range" id="fontSize" min="10" max="80" value="28">
+            <div class="field-label">Font Size: <span id="sizeVal">28</span>px</div>
+            <input type="range" id="fontSize" min="12" max="72" value="28" oninput="document.getElementById('sizeVal').textContent=this.value; renderEditor()">
           </div>
         </div>
-
         <div>
-          <div class="fl">Color</div>
-          <div class="crow">
-            <div class="cs active" style="background:#fff" data-color="#ffffff" onclick="setColor(this)"></div>
-            <div class="cs" style="background:#ffd700" data-color="#ffd700" onclick="setColor(this)"></div>
-            <div class="cs" style="background:#ff6b8a" data-color="#ff6b8a" onclick="setColor(this)"></div>
-            <div class="cs" style="background:#56cffc" data-color="#56cffc" onclick="setColor(this)"></div>
-            <div class="cs" style="background:#45e0a0" data-color="#45e0a0" onclick="setColor(this)"></div>
-            <div class="cs" style="background:#c56cfc" data-color="#c56cfc" onclick="setColor(this)"></div>
-            <input type="color" class="fi" id="customColor" value="#ffffff" oninput="customColorChange(this)" style="width:52px;height:30px;padding:2px 5px;border-radius:50%">
+          <div class="field-label">Text Color</div>
+          <div class="color-row">
+            <div class="color-swatch active" style="background:#fff" data-color="#ffffff" onclick="setColor(this)"></div>
+            <div class="color-swatch" style="background:#ffd700" data-color="#ffd700" onclick="setColor(this)"></div>
+            <div class="color-swatch" style="background:#ff6b8a" data-color="#ff6b8a" onclick="setColor(this)"></div>
+            <div class="color-swatch" style="background:#56cffc" data-color="#56cffc" onclick="setColor(this)"></div>
+            <div class="color-swatch" style="background:#45e0a0" data-color="#45e0a0" onclick="setColor(this)"></div>
+            <div class="color-swatch" style="background:#c56cfc" data-color="#c56cfc" onclick="setColor(this)"></div>
+            <input type="color" class="field-input" id="customColor" value="#ffffff" oninput="customColorChange(this)" style="width:60px;height:30px;padding:2px 4px;border-radius:50%;cursor:pointer;">
           </div>
         </div>
-
         <div>
-          <div class="fl">Opacity: <span id="opacityVal">100</span>%</div>
-          <input type="range" id="textOpacity" min="10" max="100" value="100">
+          <div class="field-label">Text Opacity: <span id="opacityVal">100</span>%</div>
+          <input type="range" id="textOpacity" min="10" max="100" value="100" oninput="document.getElementById('opacityVal').textContent=this.value; renderEditor()">
         </div>
-
         <div>
-          <div class="fl">Position (or drag on canvas)</div>
-          <div class="pgrid">
-            <button class="pbtn" onclick="setPosBtn(this,'top-left')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'top-center')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'top-right')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'mid-left')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'mid-center')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'mid-right')"></button>
-            <button class="pbtn active" onclick="setPosBtn(this,'bot-left')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'bot-center')"></button>
-            <button class="pbtn" onclick="setPosBtn(this,'bot-right')"></button>
+          <div class="field-label">Text Position</div>
+          <div class="pos-grid" id="posGrid">
+            <button class="pos-btn" onclick="setPosBtn(this,'top-left')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'top-center')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'top-right')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'mid-left')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'mid-center')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'mid-right')"></button>
+            <button class="pos-btn active" onclick="setPosBtn(this,'bot-left')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'bot-center')"></button>
+            <button class="pos-btn" onclick="setPosBtn(this,'bot-right')"></button>
           </div>
         </div>
       </div>
 
-      <div class="cwrap" style="position:relative">
+      <!-- Canvas preview -->
+      <div class="canvas-wrap">
         <canvas id="editorCanvas" width="600" height="450"></canvas>
-        <div class="drag-hint">Click canvas to drag text</div>
       </div>
     </div>
 
-    <div class="brow">
-      <button class="btn btn-s" onclick="gotoStep(2)">← Back</button>
-      <button class="btn btn-p" onclick="saveHistory();gotoStep(4)">Next: Preview & Download →</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="gotoStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="gotoStep(3)">Next: Preview & Download →</button>
     </div>
   </div>
 
-  <!-- STEP 5: PREVIEW -->
-  <div class="panel" id="panel-4">
-    <div class="pt">🎉 Preview & Download</div>
-    <div class="ps">Your design with watermark · toggle Before/After to compare</div>
+  <!-- ── STEP 4: PREVIEW ── -->
+  <div class="panel" id="panel-3">
+    <div class="panel-title">🎉 Preview & Download</div>
+    <div class="panel-sub">Your design is ready with a watermark. Upgrade to remove it!</div>
 
-    <div class="pvlay">
-      <div class="ba-wrap">
+    <div class="preview-layout">
+      <div class="preview-main-canvas">
         <canvas id="previewCanvas" width="800" height="600"></canvas>
-        <div class="ba-btn">
-          <button class="btn btn-s btn-sm" id="baBtn" onclick="toggleBA()">👁 Before/After</button>
-        </div>
       </div>
 
-      <div class="pside">
-        <div class="ic">
-          <div class="ict">📋 Design Summary</div>
-          <div class="ir"><span>Template</span><span id="sumTemplate">—</span></div>
-          <div class="ir"><span>Caption</span><span id="sumCaption">—</span></div>
-          <div class="ir"><span>Text Layers</span><span id="sumLayers">—</span></div>
-          <div class="ir"><span>Preset</span><span id="sumPreset">—</span></div>
-          <div class="ir"><span>Resolution</span><span id="sumSize">—</span></div>
+      <div class="preview-side">
+        <div class="info-card">
+          <div class="info-card-title">📋 Design Summary</div>
+          <div class="info-row"><span>Template</span><span id="sumTemplate">—</span></div>
+          <div class="info-row"><span>Caption</span><span id="sumCaption">—</span></div>
+          <div class="info-row"><span>Font</span><span id="sumFont">—</span></div>
+          <div class="info-row"><span>Size</span><span id="sumSize">—</span></div>
+          <div class="info-row"><span>Resolution</span><span>800 × 600 px</span></div>
         </div>
 
-        <div class="ic">
-          <div class="ict">⬇️ Export Options</div>
-          <div class="fl" style="margin-bottom:.4rem">Format</div>
-          <select class="fi" id="exportFmt" style="margin-bottom:.7rem">
-            <option value="png">PNG (lossless)</option>
-            <option value="jpg">JPG (smaller)</option>
-          </select>
-          <div id="qualityWrap" style="display:none">
-            <div class="fl">JPG Quality: <span id="fl_q">85</span>%</div>
-            <input type="range" id="exportQuality" min="10" max="100" value="85" oninput="document.getElementById('fl_q').textContent=this.value">
-          </div>
+        <div class="watermark-note">
+          <span class="wnote-icon">💧</span>
+          <span>The preview includes a <strong>watermark</strong>. Purchase a license to export a clean, watermark-free version at full resolution.</span>
         </div>
 
-        <div class="wnote">
-          <span>💧</span>
-          <span>Preview includes a <strong>watermark</strong>. Purchase to export clean full-res.</span>
-        </div>
-
-        <div class="dw">
-          <button class="btn btn-ok btn-w" onclick="downloadImage(document.getElementById('exportFmt').value)">⬇️ Download Preview</button>
-          <button class="btn btn-out btn-w" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
-          <button class="btn btn-s btn-w" onclick="gotoStep(3)">✏️ Edit Again</button>
-          <button class="btn btn-s btn-w" onclick="gotoStep(0)">🔄 Start Over</button>
+        <div class="download-wrap">
+          <button class="btn btn-success btn-download" onclick="downloadImage()">⬇️ Download Preview</button>
+          <button class="btn btn-outline-accent btn-download" onclick="gotoStep(2)">✏️ Edit Again</button>
+          <button class="btn btn-secondary btn-download" onclick="gotoStep(0)">🔄 Start Over</button>
         </div>
       </div>
     </div>
@@ -254,8 +781,387 @@
 
 </div>
 
+<!-- Toast -->
 <div id="toast">✓ Done!</div>
 
-<script src="editor.js"></script>
+<script>
+/* ===================================================
+   STATE
+=================================================== */
+let uploadedImg   = null;
+let selectedTpl   = 0;
+let currentStep   = 0;
+let textColor     = '#ffffff';
+let textPos       = 'bot-left';
+
+/* ===================================================
+   TEMPLATES (drawn on off-screen canvases)
+=================================================== */
+const TEMPLATES = [
+  { name: 'Sunset Gold',    draw: drawSunset    },
+  { name: 'Ocean Mist',     draw: drawOcean     },
+  { name: 'Neon Nights',    draw: drawNeon      },
+  { name: 'Minimalist',     draw: drawMinimal   },
+  { name: 'Forest Bloom',   draw: drawForest    },
+  { name: 'Vintage Film',   draw: drawVintage   },
+];
+
+function drawSunset(ctx, w, h) {
+  // Draw ONLY the gradient border ring — center stays transparent
+  const b = Math.round(w*0.045);
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0, '#ff6b35'); g.addColorStop(1, '#ffd700');
+  ctx.save();
+  // Fill full canvas with gradient, then cut out inner rect to leave a ring
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
+}
+function drawOcean(ctx, w, h) {
+  const b = Math.round(w*0.04);
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,'#0077b6'); g.addColorStop(1,'#00b4d8');
+  ctx.save();
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
+}
+function drawNeon(ctx, w, h) {
+  const b = Math.round(w*0.04);
+  ctx.save();
+  // Draw only a dark border ring
+  ctx.fillStyle = '#0b0d14'; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  // Neon inner stroke on top
+  ctx.shadowColor='#7c5cfc'; ctx.shadowBlur=18;
+  ctx.strokeStyle='#7c5cfc'; ctx.lineWidth=3;
+  ctx.strokeRect(b, b, w-b*2, h-b*2);
+  ctx.shadowColor='#c56cfc'; ctx.shadowBlur=24;
+  ctx.strokeStyle='#c56cfc'; ctx.lineWidth=1.5;
+  ctx.strokeRect(b+4, b+4, w-b*2-8, h-b*2-8);
+  ctx.shadowBlur=0;
+  ctx.restore();
+}
+function drawMinimal(ctx, w, h) {
+  const b = Math.round(w*0.04);
+  ctx.save();
+  // Thin dark border ring
+  ctx.fillStyle='rgba(24,25,31,0.92)'; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1;
+  ctx.strokeRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
+}
+function drawForest(ctx, w, h) {
+  const b = Math.round(w*0.04);
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,'#134e25'); g.addColorStop(1,'#45e0a0');
+  ctx.save();
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
+}
+function drawVintage(ctx, w, h) {
+  const b = Math.round(w*0.05);
+  const g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w*0.7);
+  g.addColorStop(0,'#c9a95c'); g.addColorStop(1,'#5c3b18');
+  ctx.save();
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  ctx.clearRect(b, b, w-b*2, h-b*2);
+  ctx.restore();
+}
+
+/* ===================================================
+   RENDER HELPERS
+=================================================== */
+function compositeOntoCanvas(ctx, w, h, tImg, addWatermark) {
+  ctx.clearRect(0,0,w,h);
+  const b = Math.round(w * 0.04);
+
+  // 1. Draw uploaded image into the inner rectangle
+  if (uploadedImg) {
+    const iw = uploadedImg.naturalWidth || uploadedImg.width;
+    const ih = uploadedImg.naturalHeight || uploadedImg.height;
+    const rw = w - b*2, rh = h - b*2;
+    const scale = Math.max(rw/iw, rh/ih);
+    const sw = iw*scale, sh = ih*scale;
+    const sx = b + (rw-sw)/2, sy = b + (rh-sh)/2;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(b,b,rw,rh);
+    ctx.clip();
+    ctx.drawImage(uploadedImg, sx, sy, sw, sh);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = '#1a1d2b';
+    ctx.fillRect(b, b, w-b*2, h-b*2);
+    ctx.fillStyle='rgba(255,255,255,0.07)';
+    ctx.font = `${Math.round(w*0.05)}px Inter, sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('No image uploaded', w/2, h/2);
+  }
+
+  // 2. Overlay the template frame
+  if (tImg) ctx.drawImage(tImg, 0, 0, w, h);
+
+  // 3. Add text
+  const mainTxt = document.getElementById('txtMain')?.value || '';
+  const subTxt  = document.getElementById('txtSub')?.value  || '';
+  const fs      = parseInt(document.getElementById('fontSize')?.value || 28);
+  const ff      = document.getElementById('fontFamily')?.value || 'Georgia, serif';
+  const op      = (parseInt(document.getElementById('textOpacity')?.value || 100))/100;
+
+  if (mainTxt || subTxt) {
+    const pad = Math.round(w*0.05);
+    const [vy, ha] = getTextAlign(textPos, pad, w, h, fs);
+    ctx.save();
+    ctx.globalAlpha = op;
+
+    // shadow
+    ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
+
+    // main text
+    ctx.font = `bold ${fs}px ${ff}`;
+    ctx.fillStyle = textColor;
+    ctx.textAlign = ha;
+    const tx = ha==='left' ? pad : ha==='right' ? w-pad : w/2;
+    ctx.fillText(mainTxt, tx, vy);
+
+    // sub text
+    if (subTxt) {
+      ctx.font = `${Math.round(fs*0.58)}px ${ff}`;
+      ctx.fillStyle = textColor;
+      ctx.globalAlpha = op * 0.75;
+      ctx.fillText(subTxt, tx, vy + fs*1.1);
+    }
+    ctx.restore();
+  }
+
+  // 4. Watermark
+  if (addWatermark) {
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle='#fff';
+    // diagonal repeating watermark
+    for (let y=-h; y<h*2; y+=Math.round(h*0.22)) {
+      for (let x=-w; x<w*2; x+=Math.round(w*0.35)) {
+        ctx.save();
+        ctx.translate(x,y);
+        ctx.rotate(-Math.PI/6);
+        ctx.font = `bold ${Math.round(w*0.04)}px Inter, sans-serif`;
+        ctx.fillText('© CanvasFlow', 0, 0);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+
+    // bottom badge
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,0.55)';
+    ctx.fillRect(0, h-36, w, 36);
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.font=`600 ${Math.round(w*0.022)}px Inter, sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('💧 WATERMARKED PREVIEW — canvasflow.demo', w/2, h-18);
+    ctx.restore();
+  }
+}
+
+function getTextAlign(pos, pad, w, h, fs) {
+  const t = { top: pad+fs, mid: h/2, bot: h-pad-fs*1.2 };
+  const a = { left:'left', center:'center', right:'right' };
+  const map = {
+    'top-left':[t.top,'left'], 'top-center':[t.top,'center'], 'top-right':[t.top,'right'],
+    'mid-left':[t.mid,'left'], 'mid-center':[t.mid,'center'], 'mid-right':[t.mid,'right'],
+    'bot-left':[t.bot,'left'], 'bot-center':[t.bot,'center'], 'bot-right':[t.bot,'right'],
+  };
+  return map[pos] || [t.bot, 'left'];
+}
+
+/* ===================================================
+   TEMPLATE THUMBNAILS
+=================================================== */
+function buildTemplateGrid() {
+  const grid = document.getElementById('templatesGrid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach((tpl, i) => {
+    const c = document.createElement('canvas');
+    c.width=240; c.height=180;
+    const ctx = c.getContext('2d');
+    tpl.draw(ctx, 240, 180);
+    const card  = document.createElement('div');
+    card.className='template-card' + (i===selectedTpl?' selected':'');
+    card.innerHTML=`<div class="template-check">✓</div><div class="template-name">${tpl.name}</div>`;
+    card.insertBefore(c, card.firstChild);
+    card.onclick = () => selectTemplate(i);
+    grid.appendChild(card);
+  });
+}
+
+function selectTemplate(i) {
+  selectedTpl = i;
+  document.querySelectorAll('.template-card').forEach((el,j)=>{
+    el.classList.toggle('selected', j===i);
+  });
+}
+
+/* ===================================================
+   EDITOR CANVAS
+=================================================== */
+function getTemplateImage(cb) {
+  const off = document.createElement('canvas');
+  off.width=600; off.height=450;
+  const ctx = off.getContext('2d');
+  TEMPLATES[selectedTpl].draw(ctx, 600, 450);
+  const img = new Image();
+  img.onload = () => cb(img);
+  img.src = off.toDataURL();
+}
+
+function renderEditor() {
+  const canvas = document.getElementById('editorCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, false); });
+}
+
+function renderPreview() {
+  const canvas = document.getElementById('previewCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const off = document.createElement('canvas');
+  off.width=800; off.height=600;
+  const ctx2 = off.getContext('2d');
+  TEMPLATES[selectedTpl].draw(ctx2, 800, 600);
+  const img = new Image();
+  img.onload = () => {
+    compositeOntoCanvas(ctx, 800, 600, img, true);
+  };
+  img.src = off.toDataURL();
+
+  // Summary
+  document.getElementById('sumTemplate').textContent = TEMPLATES[selectedTpl].name;
+  const cap = document.getElementById('txtMain').value;
+  document.getElementById('sumCaption').textContent = cap.length>18 ? cap.slice(0,18)+'…' : cap;
+  const ff = document.getElementById('fontFamily').value;
+  document.getElementById('sumFont').textContent = ff.split(',')[0].replace(/'/g,'');
+  document.getElementById('sumSize').textContent = document.getElementById('fontSize').value + 'px';
+}
+
+/* ===================================================
+   STEP NAV
+=================================================== */
+function gotoStep(n) {
+  if (n===1 && !uploadedImg) { showToast('Please upload an image first!'); return; }
+  currentStep = n;
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  updateStepper();
+  if (n===1) buildTemplateGrid();
+  if (n===2) setTimeout(renderEditor, 60);
+  if (n===3) setTimeout(renderPreview, 60);
+  window.scrollTo({top:120, behavior:'smooth'});
+}
+
+function jumpTo(n) {
+  if (n > currentStep) { gotoStep(n); return; }
+  gotoStep(n);
+}
+
+function updateStepper() {
+  for (let i=0;i<4;i++) {
+    const si = document.getElementById('si-'+i);
+    const sn = document.getElementById('sn-'+i);
+    si.className = 'step-item' + (i===currentStep?' active': i<currentStep?' done':'');
+    sn.textContent = i<currentStep ? '✓' : i+1;
+    if (i<3) document.getElementById('sl-'+i).className='step-line'+(i<currentStep?' done':'');
+  }
+}
+
+/* ===================================================
+   UPLOAD
+=================================================== */
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) loadFile(file);
+});
+const uz = document.getElementById('uploadZone');
+uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag-over'); });
+uz.addEventListener('dragleave', () => uz.classList.remove('drag-over'));
+uz.addEventListener('drop', e => {
+  e.preventDefault(); uz.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadFile(file);
+});
+
+function loadFile(file) {
+  const url = URL.createObjectURL(file);
+  uploadedImg = new Image();
+  uploadedImg.onload = () => {
+    document.getElementById('previewThumb').src = url;
+    document.getElementById('previewName').textContent = file.name;
+    document.getElementById('previewSize').textContent = (file.size/1024).toFixed(1)+' KB';
+    document.getElementById('uploadPreviewWrap').classList.add('show');
+    showToast('✓ Image loaded!');
+  };
+  uploadedImg.src = url;
+}
+
+function removeImage() {
+  uploadedImg = null;
+  document.getElementById('fileInput').value='';
+  document.getElementById('uploadPreviewWrap').classList.remove('show');
+}
+
+/* ===================================================
+   TEXT CONTROLS
+=================================================== */
+function setColor(el) {
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  textColor = el.dataset.color;
+  document.getElementById('customColor').value = textColor;
+  renderEditor();
+}
+function customColorChange(el) {
+  textColor = el.value;
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  renderEditor();
+}
+function setPosBtn(el, pos) {
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  textPos = pos;
+  renderEditor();
+}
+
+/* ===================================================
+   DOWNLOAD
+=================================================== */
+function downloadImage() {
+  const canvas = document.getElementById('previewCanvas');
+  const link   = document.createElement('a');
+  link.download = 'canvasflow-preview.png';
+  link.href     = canvas.toDataURL('image/png');
+  link.click();
+  showToast('⬇️ Downloading...');
+}
+
+/* ===================================================
+   TOAST
+=================================================== */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ===================================================
+   INIT
+=================================================== */
+buildTemplateGrid();
+</script>
 </body>
 </html>
