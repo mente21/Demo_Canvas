@@ -561,6 +561,79 @@
     }
     .btn-outline-accent:hover { background: rgba(124,92,252,0.1); }
 
+    /* ── Cart & Checkout ── */
+    .cart-item {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 1rem; margin-bottom: 0.75rem;
+    }
+    .cart-thumb {
+      width: 90px; height: 68px; object-fit: cover;
+      border-radius: 6px; border: 2px solid var(--accent1); flex-shrink: 0;
+    }
+    .cart-info { flex:1; }
+    .cart-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+    .cart-meta { font-size: 0.76rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .cart-qty-row { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--text); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s;
+    }
+    .qty-btn:hover { border-color: var(--accent1); }
+    .qty-num { font-weight: 600; min-width: 20px; text-align: center; }
+    .cart-price { font-weight: 700; font-size: 1rem; color: var(--accent2); text-align: right; white-space: nowrap; }
+    .cart-edit-del { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+    .cart-divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+    .promo-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .promo-input { flex:1; }
+    .totals-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 1rem 1.25rem;
+    }
+    .total-row { display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.45rem; }
+    .total-row.grand { font-size: 1.1rem; font-weight: 800; color: var(--accent2); border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.3rem; }
+
+    /* Checkout form */
+    .co-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .co-label { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .pay-options { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 4px; }
+    .pay-opt {
+      flex: 1; min-width: 140px; padding: 0.85rem 1rem;
+      border: 2px solid var(--border); border-radius: var(--r-sm);
+      cursor: pointer; transition: all 0.25s; text-align: center;
+      background: var(--card); font-weight: 600; font-size: 0.88rem;
+    }
+    .pay-opt.selected { border-color: var(--accent1); background: rgba(124,92,252,0.1); color: var(--accent1); }
+    .qr-box {
+      background: #fff; border-radius: var(--r-sm); padding: 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      max-width: 200px; margin: 0.5rem auto 0;
+    }
+    .qr-img { width: 160px; height: 160px; object-fit: contain; }
+    .qr-label { font-size: 0.75rem; color: #333; font-weight: 600; text-align: center; }
+    .receipt-upload-area {
+      border: 2px dashed var(--accent1); border-radius: var(--r-sm);
+      padding: 1.2rem; text-align: center; cursor: pointer;
+      background: rgba(124,92,252,0.04); transition: background 0.2s;
+    }
+    .receipt-upload-area:hover { background: rgba(124,92,252,0.09); }
+    .co-order-summary {
+      background: rgba(124,92,252,0.06); border: 1px solid rgba(124,92,252,0.2);
+      border-radius: var(--r-sm); padding: 0.85rem 1rem; margin-bottom: 1rem;
+      display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+    }
+    .success-overlay {
+      position: fixed; inset: 0; background: rgba(11,13,20,0.95);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9000; gap: 1.5rem; text-align: center; padding: 2rem;
+    }
+    .success-icon { font-size: 4rem; }
+    .success-title { font-size: 2rem; font-weight: 800; color: var(--accent2); }
+    .success-sub { color: var(--muted); font-size: 0.95rem; max-width: 360px; }
+
     /* ── Toast ── */
     #toast {
       position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
@@ -947,6 +1020,153 @@
     </div>
   </div>
 
+  <!-- ── SECTION 4: CART ── -->
+  <div class="panel" id="panel-4">
+    <div class="panel-title">🛒 Your Cart</div>
+    <div class="panel-sub">Review your item before checkout</div>
+
+    <!-- Cart item row (populated by JS) -->
+    <div id="cartItemsWrap"></div>
+
+    <hr class="cart-divider">
+
+    <!-- Promo code -->
+    <div class="field-label">🏷️ Promo Code</div>
+    <div class="promo-row">
+      <input class="field-input promo-input" id="promoInput" type="text" placeholder="Enter promo code…">
+      <button class="btn btn-secondary" onclick="applyPromo()" style="white-space:nowrap;">Apply</button>
+    </div>
+
+    <!-- Shipping calculator -->
+    <div class="field-label" style="margin-bottom:6px;">🚚 Shipping District</div>
+    <select class="field-input" id="shippingSelect" onchange="updateTotals()" style="margin-bottom:1rem;">
+      <option value="0">— Select your district —</option>
+      <option value="3">Metro Manila (₱3)</option>
+      <option value="5">Luzon (₱5)</option>
+      <option value="7">Visayas (₱7)</option>
+      <option value="9">Mindanao (₱9)</option>
+    </select>
+
+    <!-- Totals -->
+    <div class="totals-box">
+      <div class="total-row"><span>Subtotal</span><span id="cartSubtotal">₱0.00</span></div>
+      <div class="total-row"><span>Discount</span><span id="cartDiscount" style="color:var(--accent2);">—</span></div>
+      <div class="total-row"><span>Shipping</span><span id="cartShipping">—</span></div>
+      <div class="total-row grand"><span>Total</span><span id="cartTotal">₱0.00</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="gotoStep(3)">← Back</button>
+      <button class="btn btn-primary" onclick="gotoCheckout()">Checkout →</button>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: CHECKOUT ── -->
+  <div class="panel" id="panel-5">
+    <div class="panel-title">📦 Checkout</div>
+    <div class="panel-sub">Fill in your details and place your order</div>
+
+    <!-- Order summary strip -->
+    <div class="co-order-summary" id="coSummaryStrip">
+      <canvas id="coThumbCanvas" width="80" height="60" style="border-radius:6px;border:2px solid var(--accent1);flex-shrink:0;"></canvas>
+      <div style="flex:1;min-width:160px;">
+        <div style="font-weight:700;font-size:0.9rem;" id="coSumName">Custom Photo Print</div>
+        <div style="font-size:0.77rem;color:var(--muted);" id="coSumMeta">Template · Qty 1</div>
+      </div>
+      <div style="font-weight:800;font-size:1.1rem;color:var(--accent2);" id="coSumTotal">₱0.00</div>
+    </div>
+
+    <!-- Guest details form -->
+    <div class="co-form">
+      <div>
+        <div class="co-label">Full Name *</div>
+        <input class="field-input" id="coName" type="text" placeholder="e.g. Juan Dela Cruz">
+      </div>
+      <div>
+        <div class="co-label">Complete Address *</div>
+        <input class="field-input" id="coAddress" type="text" placeholder="Street, Barangay, City, Province">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div>
+          <div class="co-label">Phone Number *</div>
+          <input class="field-input" id="coPhone" type="tel" placeholder="09XXXXXXXXX">
+        </div>
+        <div>
+          <div class="co-label">Email</div>
+          <input class="field-input" id="coEmail" type="email" placeholder="optional">
+        </div>
+      </div>
+      <div>
+        <div class="co-label">Facebook Name *</div>
+        <input class="field-input" id="coFb" type="text" placeholder="Your Facebook display name">
+      </div>
+      <div>
+        <div class="co-label">Order Notes</div>
+        <input class="field-input" id="coNotes" type="text" placeholder="Any special instructions…">
+      </div>
+
+      <!-- Payment mode -->
+      <div>
+        <div class="co-label">Mode of Payment *</div>
+        <div class="pay-options">
+          <div class="pay-opt" id="payOptBank" onclick="selectPayment('bank')">🏦 Online Banking</div>
+          <div class="pay-opt" id="payOptCod" onclick="selectPayment('cod')">🏠 Cash on Delivery</div>
+        </div>
+      </div>
+
+      <!-- Online Banking section (shown conditionally) -->
+      <div id="bankSection" style="display:none;">
+        <div class="co-label" style="margin-bottom:4px;">📲 Scan to Pay</div>
+        <div class="qr-box">
+          <!-- QR code placeholder — replace src with real QR image -->
+          <svg class="qr-img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Simple visual QR placeholder -->
+            <rect width="100" height="100" fill="white"/>
+            <rect x="5" y="5" width="30" height="30" fill="none" stroke="#111" stroke-width="4"/>
+            <rect x="12" y="12" width="16" height="16" fill="#111"/>
+            <rect x="65" y="5" width="30" height="30" fill="none" stroke="#111" stroke-width="4"/>
+            <rect x="72" y="12" width="16" height="16" fill="#111"/>
+            <rect x="5" y="65" width="30" height="30" fill="none" stroke="#111" stroke-width="4"/>
+            <rect x="12" y="72" width="16" height="16" fill="#111"/>
+            <rect x="40" y="5" width="6" height="6" fill="#111"/><rect x="50" y="5" width="6" height="6" fill="#111"/>
+            <rect x="40" y="15" width="6" height="6" fill="#111"/><rect x="55" y="15" width="6" height="6" fill="#111"/>
+            <rect x="45" y="25" width="6" height="6" fill="#111"/><rect x="55" y="25" width="6" height="6" fill="#111"/>
+            <rect x="40" y="40" width="6" height="6" fill="#111"/><rect x="50" y="40" width="6" height="6" fill="#111"/><rect x="60" y="40" width="6" height="6" fill="#111"/>
+            <rect x="70" y="40" width="6" height="6" fill="#111"/><rect x="80" y="40" width="6" height="6" fill="#111"/>
+            <rect x="40" y="50" width="6" height="6" fill="#111"/><rect x="60" y="50" width="6" height="6" fill="#111"/>
+            <rect x="45" y="60" width="6" height="6" fill="#111"/><rect x="55" y="60" width="6" height="6" fill="#111"/><rect x="70" y="60" width="6" height="6" fill="#111"/>
+            <rect x="65" y="70" width="6" height="6" fill="#111"/><rect x="80" y="70" width="6" height="6" fill="#111"/>
+            <rect x="65" y="80" width="6" height="6" fill="#111"/><rect x="75" y="80" width="6" height="6" fill="#111"/>
+            <text x="50" y="95" text-anchor="middle" font-size="5" fill="#333" font-family="Arial">GCash / PayMaya</text>
+          </svg>
+          <div class="qr-label">Account Name: CanvasFlow Demo<br>Scan via GCash or PayMaya</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="co-label">Upload Payment Screenshot *</div>
+          <label class="receipt-upload-area" for="receiptUpload">
+            <div style="font-size:1.8rem;">📎</div>
+            <div style="font-weight:600;margin-top:4px;" id="receiptLabel">Click to upload screenshot</div>
+            <div style="font-size:0.73rem;color:var(--muted);margin-top:2px;">PNG, JPG or PDF accepted</div>
+          </label>
+          <input type="file" id="receiptUpload" accept="image/*,.pdf" style="display:none;" onchange="receiptSelected(this)">
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="gotoStep(4)">← Back to Cart</button>
+      <button class="btn btn-success" onclick="placeOrder()" style="padding:0.85rem 2rem;font-size:1rem;">✅ Place Order</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Success Overlay (hidden initially) -->
+<div class="success-overlay" id="successOverlay" style="display:none;">
+  <div class="success-icon">🎉</div>
+  <div class="success-title">Order Placed!</div>
+  <div class="success-sub">Thank you! Your order has been received. We'll contact you on Facebook to confirm delivery details.</div>
+  <button class="btn btn-primary" onclick="startOver()" style="margin-top:0.5rem;">🔄 Start a New Design</button>
 </div>
 
 <!-- Toast -->
@@ -1373,6 +1593,7 @@ function setPlatform(key) {
 =================================================== */
 function gotoStep(n) {
   if (n===1 && !uploadedImg) { showToast('Please upload an image first!'); return; }
+  if ((n===2||n===3||n===4||n===5) && !uploadedImg) { showToast('Please upload an image first!'); return; }
   currentStep = n;
   document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
   updateStepper();
@@ -1384,7 +1605,7 @@ function gotoStep(n) {
   }
   if (n===3) setTimeout(renderPreview, 60);
   window.scrollTo({top:120, behavior:'smooth'});
-  persistState();
+  if (n <= 3) persistState();
 }
 
 function jumpTo(n) {
@@ -1396,9 +1617,12 @@ function updateStepper() {
   for (let i=0;i<4;i++) {
     const si = document.getElementById('si-'+i);
     const sn = document.getElementById('sn-'+i);
-    si.className = 'step-item' + (i===currentStep?' active': i<currentStep?' done':'');
-    sn.textContent = i<currentStep ? '✓' : i+1;
-    if (i<3) document.getElementById('sl-'+i).className='step-line'+(i<currentStep?' done':'');
+    if (!si || !sn) continue;
+    const eff = Math.min(currentStep, 3); // clamp for stepper display
+    si.className = 'step-item' + (i===eff?' active': i<eff?' done':'');
+    sn.textContent = i<eff ? '✓' : i+1;
+    const sl = document.getElementById('sl-'+i);
+    if (sl) sl.className='step-line'+(i<eff?' done':'');
   }
 }
 
@@ -1878,12 +2102,151 @@ document.addEventListener('click', e => {
 });
 
 /* ===================================================
-   ADD TO CART
+   ADD TO CART  — Cart & Checkout Logic
 =================================================== */
+
+// Cart state
+const ITEM_PRICE = 25; // demo price per item in PHP
+let cartQty        = 1;
+let cartThumbUrl   = '';
+let promoDiscount  = 0;  // flat PHP amount
+let selectedPayment = '';
+
 function addToCart() {
-  showToast('🛒 Added to cart! Redirecting to checkout…');
+  if (!uploadedImg) { showToast('Upload an image first!'); return; }
+
+  // Capture watermarked canvas as thumbnail
+  const offC = document.createElement('canvas');
+  offC.width = 300; offC.height = 225;
+  const ctx2 = offC.getContext('2d');
+  getTemplateImage(tImg => {
+    compositeOntoCanvas(ctx2, 300, 225, tImg, true, false);
+    cartThumbUrl = offC.toDataURL('image/jpeg', 0.85);
+    cartQty = 1;
+    promoDiscount = 0;
+    selectedPayment = '';
+    document.getElementById('promoInput').value = '';
+    document.getElementById('shippingSelect').value = '0';
+    buildCartUI();
+    updateTotals();
+    createConfetti();
+    gotoStep(4);
+  });
+}
+
+function buildCartUI() {
+  const wrap = document.getElementById('cartItemsWrap');
+  if (!wrap) return;
+  const tpl = TEMPLATES[selectedTpl].name;
+  const cap = textLayers[0]?.text || '';
+  wrap.innerHTML = `
+    <div class="cart-item">
+      <img class="cart-thumb" id="cartThumbImg" src="${cartThumbUrl}" alt="design preview">
+      <div class="cart-info">
+        <div class="cart-name">Custom Photo Print</div>
+        <div class="cart-meta">Template: ${tpl}${cap ? ' · "' + (cap.length > 20 ? cap.slice(0,20)+'…' : cap) + '"' : ''}</div>
+        <div class="cart-qty-row">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-num" id="cartQtyNum">${cartQty}</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+          <span style="font-size:0.78rem;color:var(--muted);margin-left:4px;">× ₱${ITEM_PRICE}.00 each</span>
+        </div>
+      </div>
+      <div class="cart-edit-del">
+        <span class="cart-price" id="cartItemPrice">₱${(ITEM_PRICE * cartQty).toFixed(2)}</span>
+        <button class="btn btn-outline-accent" style="font-size:0.75rem;padding:4px 10px;" onclick="gotoStep(2)">✏️ Edit</button>
+      </div>
+    </div>
+  `;
+}
+
+function changeQty(delta) {
+  cartQty = Math.max(1, cartQty + delta);
+  document.getElementById('cartQtyNum').textContent = cartQty;
+  document.getElementById('cartItemPrice').textContent = '₱' + (ITEM_PRICE * cartQty).toFixed(2);
+  updateTotals();
+}
+
+function applyPromo() {
+  const code = (document.getElementById('promoInput').value || '').trim().toUpperCase();
+  const codes = { 'DEMO10': 10, 'CANVAS5': 5, 'WELCOME': 8 };
+  if (codes[code]) {
+    promoDiscount = codes[code];
+    showToast('✅ Promo applied! −₱' + promoDiscount);
+  } else {
+    promoDiscount = 0;
+    showToast('❌ Invalid promo code');
+  }
+  updateTotals();
+}
+
+function updateTotals() {
+  const subtotal = ITEM_PRICE * cartQty;
+  const ship = parseFloat(document.getElementById('shippingSelect').value) || 0;
+  const total = Math.max(0, subtotal - promoDiscount + ship);
+
+  document.getElementById('cartSubtotal').textContent = '₱' + subtotal.toFixed(2);
+  document.getElementById('cartDiscount').textContent = promoDiscount > 0 ? '−₱' + promoDiscount.toFixed(2) : '—';
+  document.getElementById('cartShipping').textContent = ship > 0 ? '₱' + ship.toFixed(2) : '—';
+  document.getElementById('cartTotal').textContent = '₱' + total.toFixed(2);
+}
+
+function gotoCheckout() {
+  const ship = parseFloat(document.getElementById('shippingSelect').value) || 0;
+  if (!ship) { showToast('Please select your shipping district'); return; }
+
+  // Populate checkout summary strip
+  const tpl = TEMPLATES[selectedTpl].name;
+  const ship$ = ship.toFixed(2);
+  const subtotal = ITEM_PRICE * cartQty;
+  const total = Math.max(0, subtotal - promoDiscount + ship);
+  document.getElementById('coSumName').textContent = 'Custom Photo Print × ' + cartQty;
+  document.getElementById('coSumMeta').textContent = tpl + ' · Shipping ₱' + ship$;
+  document.getElementById('coSumTotal').textContent = '₱' + total.toFixed(2);
+
+  // Draw thumbnail on checkout mini canvas
+  const coC = document.getElementById('coThumbCanvas');
+  if (coC && cartThumbUrl) {
+    const img = new Image();
+    img.onload = () => coC.getContext('2d').drawImage(img, 0, 0, 80, 60);
+    img.src = cartThumbUrl;
+  }
+  gotoStep(5);
+}
+
+function selectPayment(mode) {
+  selectedPayment = mode;
+  document.getElementById('payOptBank').classList.toggle('selected', mode === 'bank');
+  document.getElementById('payOptCod').classList.toggle('selected', mode === 'cod');
+  document.getElementById('bankSection').style.display = mode === 'bank' ? 'block' : 'none';
+}
+
+function receiptSelected(input) {
+  if (input.files && input.files[0]) {
+    document.getElementById('receiptLabel').textContent = '✅ ' + input.files[0].name;
+  }
+}
+
+function placeOrder() {
+  const name    = document.getElementById('coName').value.trim();
+  const address = document.getElementById('coAddress').value.trim();
+  const phone   = document.getElementById('coPhone').value.trim();
+  const fb      = document.getElementById('coFb').value.trim();
+  if (!name)    { showToast('Please enter your name'); return; }
+  if (!address) { showToast('Please enter your address'); return; }
+  if (!phone)   { showToast('Please enter your phone number'); return; }
+  if (!fb)      { showToast('Please enter your Facebook name'); return; }
+  if (!selectedPayment) { showToast('Please select a payment mode'); return; }
+  if (selectedPayment === 'bank') {
+    const receipt = document.getElementById('receiptUpload');
+    if (!receipt.files || !receipt.files[0]) {
+      showToast('Please upload your payment screenshot');
+      return;
+    }
+  }
+  // Show success overlay
+  document.getElementById('successOverlay').style.display = 'flex';
   createConfetti();
-  // In production: submit order data to backend here
 }
 
 /* Custom sticker upload */
