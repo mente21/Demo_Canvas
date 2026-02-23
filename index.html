@@ -836,26 +836,10 @@
         <!-- Add Text / Sticker buttons -->
         <div style="display:flex;gap:8px;">
           <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="addTextLayer()">+ Add Text</button>
-          <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="setEmojiTarget('sticker'); toggleEmojiPanel();">+ ✨ Sticker</button>
+          <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="showToast('No custom stickers uploaded from the admin');">+ ✨ Sticker</button>
         </div>
 
-        <!-- Emoji picker -->
-        <div class="emoji-wrap">
-          <div class="emoji-panel" id="emojiPanel" style="position:relative;top:auto;left:auto;width:100%;">
-            <div class="ep-target-row">
-              <button class="ep-target-btn" id="epMain" onclick="setEmojiTarget('main')">📝 Text</button>
-              <button class="ep-target-btn active" id="epSticker" onclick="setEmojiTarget('sticker')">✨ Sticker</button>
-            </div>
-            <div id="emojiList" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
-            <!-- Custom sticker upload -->
-            <div style="width:100%;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;">
-              <div class="field-label" style="margin-bottom:4px;font-size:0.68rem;">Admin: Upload Custom PNG Sticker</div>
-              <input type="file" id="stickerUpload" accept="image/png" style="display:none;" onchange="uploadCustomSticker(this)">
-              <button class="plt-btn" style="width:100%;justify-content:center;font-size:0.72rem;" onclick="document.getElementById('stickerUpload').click()">📁 Upload PNG Sticker</button>
-              <div id="customStickers" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;"></div>
-            </div>
-          </div>
-        </div>
+
 
         <!-- Active text controls (shown only when a text layer is selected) -->
         <div id="textControls" style="display:flex;flex-direction:column;gap:0.85rem;">
@@ -1453,15 +1437,15 @@ function removeImage() {
   uploadedImg = null;
   document.getElementById('fileInput').value='';
   document.getElementById('uploadPreviewWrap').classList.remove('show');
-  localStorage.removeItem('canvasflow_img');
-  localStorage.removeItem('canvasflow_img_meta');
+  sessionStorage.removeItem('canvasflow_img');
+  sessionStorage.removeItem('canvasflow_img_meta');
 }
 
 function startOver() {
   if (confirm('This will clear your current design. Are you sure?')) {
-    localStorage.removeItem('canvasflow_state');
-    localStorage.removeItem('canvasflow_img');
-    localStorage.removeItem('canvasflow_img_meta');
+    sessionStorage.removeItem('canvasflow_state');
+    sessionStorage.removeItem('canvasflow_img');
+    sessionStorage.removeItem('canvasflow_img_meta');
     location.reload();
   }
 }
@@ -1825,7 +1809,10 @@ function initCanvasInteractions() {
    EMOJI
 =================================================== */
 function toggleEmojiPanel() {
-  // Panel is now always-visible inline, nothing to toggle
+  const panel = document.getElementById('emojiPanel');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
 }
 function setEmojiTarget(t) {
   emojiTarget = t;
@@ -1969,7 +1956,7 @@ function persistState() {
     textLayers,
     activeLayerIndex
   };
-  localStorage.setItem('canvasflow_state', JSON.stringify(state));
+  sessionStorage.setItem('canvasflow_state', JSON.stringify(state));
 }
 
 function persistImage(img) {
@@ -1986,8 +1973,8 @@ function persistImage(img) {
     canvas.width = w; canvas.height = h;
     ctx.drawImage(img, 0, 0, w, h);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    localStorage.setItem('canvasflow_img', dataUrl);
-    localStorage.setItem('canvasflow_img_meta', JSON.stringify({ 
+    sessionStorage.setItem('canvasflow_img', dataUrl);
+    sessionStorage.setItem('canvasflow_img_meta', JSON.stringify({ 
       name: document.getElementById('previewName').textContent, 
       size: document.getElementById('previewSize').textContent 
     }));
@@ -1995,8 +1982,8 @@ function persistImage(img) {
 }
 
 function loadPersistedState() {
-  const s = localStorage.getItem('canvasflow_state');
-  const imgData = localStorage.getItem('canvasflow_img');
+  const s = sessionStorage.getItem('canvasflow_state');
+  const imgData = sessionStorage.getItem('canvasflow_img');
   
   if (s) {
     try {
@@ -2022,7 +2009,7 @@ function loadPersistedState() {
     uploadedImg = new Image();
     uploadedImg.onload = () => {
       document.getElementById('previewThumb').src = imgData;
-      const meta = JSON.parse(localStorage.getItem('canvasflow_img_meta') || '{}');
+      const meta = JSON.parse(sessionStorage.getItem('canvasflow_img_meta') || '{}');
       document.getElementById('previewName').textContent = meta.name || 'recovered.jpg';
       document.getElementById('previewSize').textContent = meta.size || '0 KB';
       document.getElementById('uploadPreviewWrap').classList.add('show');
