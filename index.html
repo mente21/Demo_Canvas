@@ -775,7 +775,7 @@
     <div class="step-line" id="sl-2"></div>
     <div class="step-item" id="si-3" onclick="jumpTo(3)">
       <div class="step-num" id="sn-3">4</div>
-      <div class="step-label">Preview & Download</div>
+      <div class="step-label">Add to Cart</div>
     </div>
   </div>
 
@@ -818,221 +818,144 @@
     </div>
   </div>
 
-  <!-- ── STEP 3: TEXT & FILTERS ── -->
+  <!-- ── STEP 3: CUSTOMIZE ── -->
   <div class="panel" id="panel-2">
-    <div class="panel-title">✏️ Add Text &amp; Adjust Image</div>
-    <div class="panel-sub">Customize caption, color, filters — updates live on canvas</div>
+    <div class="panel-title">✏️ Customize Your Design</div>
+    <div class="panel-sub">Pick a frame, add text &amp; stickers — tap elements on the canvas to drag them</div>
 
     <div class="text-layout">
       <!-- Controls -->
       <div class="controls-col">
-        <!-- Text Layers Manager -->
-        <div class="filters-section" style="margin-top:0; padding: 0.75rem;">
-          <div class="section-head" style="margin-bottom:0.5rem; justify-content:space-between;">
-            <div class="field-label" style="margin:0">📚 Text Layers</div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button class="plt-btn" style="padding:4px 12px; font-size:0.75rem" onclick="addTextLayer()" title="Add a new text block">+ Text</button>
-              <button class="plt-btn" style="padding:4px 12px; font-size:0.75rem" onclick="setEmojiTarget('sticker'); toggleEmojiPanel();" title="Add emoji as a separate layer">+ ✨ Emoji</button>
-            </div>
-          </div>
-          <div id="layersList" style="display:flex; flex-direction:column; gap:6px;">
-            <!-- Layers will be injected here -->
-          </div>
+
+        <!-- INLINE TEMPLATE SWITCHER -->
+        <div style="background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:var(--r-sm);padding:0.85rem;">
+          <div class="field-label" style="margin-bottom:0.6rem">🖼 Frame Template</div>
+          <div id="inlineTemplatesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;"></div>
+        </div>
+
+        <!-- Add Text / Sticker buttons -->
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="addTextLayer()">+ Add Text</button>
+          <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="setEmojiTarget('sticker'); toggleEmojiPanel();">+ ✨ Sticker</button>
         </div>
 
         <!-- Emoji picker -->
         <div class="emoji-wrap">
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:0.5rem">
-            <div class="field-label" style="margin:0" id="mainLabel">Caption</div>
-            <button class="plt-btn" style="padding:3px 10px;font-size:0.75rem" onclick="toggleEmojiPanel()">😊 Emoji</button>
-            <div style="flex:1"></div>
-            <button class="plt-btn" style="padding:3px 10px;font-size:0.75rem" onclick="undo()" title="Undo (Ctrl+Z)">⟲</button>
-            <button class="plt-btn" style="padding:3px 10px;font-size:0.75rem" onclick="redo()" title="Redo (Ctrl+Y)">⟳</button>
-          </div>
-          <div class="emoji-panel" id="emojiPanel">
+          <div class="emoji-panel" id="emojiPanel" style="position:relative;top:auto;left:auto;width:100%;">
             <div class="ep-target-row">
-              <button class="ep-target-btn active" id="epMain" onclick="setEmojiTarget('main')">Main</button>
-              <button class="ep-target-btn" id="epSub" onclick="setEmojiTarget('sub')">Sub</button>
-              <button class="ep-target-btn" id="epSticker" onclick="setEmojiTarget('sticker')">✨ Sticker</button>
+              <button class="ep-target-btn" id="epMain" onclick="setEmojiTarget('main')">📝 Text</button>
+              <button class="ep-target-btn active" id="epSticker" onclick="setEmojiTarget('sticker')">✨ Sticker</button>
             </div>
             <div id="emojiList" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
-          </div>
-        </div>
-        <div>
-          <input class="field-input" id="txtMain" type="text" placeholder="Your headline text…" oninput="updateActiveLayer('text', this.value)" onchange="pushState()">
-        </div>
-        <div>
-          <div class="field-label">Sub Caption</div>
-          <input class="field-input" id="txtSub" type="text" placeholder="A short tagline…" oninput="updateActiveLayer('subText', this.value)" onchange="pushState()">
-        </div>
-        <div class="font-row">
-          <div>
-            <div class="field-label">Font</div>
-            <select class="field-input" id="fontFamily" onchange="pushState(); updateActiveLayer('fontFamily', this.value)">
-              <option value="Georgia, serif">Georgia</option>
-              <option value="'Arial', sans-serif">Arial</option>
-              <option value="'Verdana', sans-serif">Verdana</option>
-              <option value="'Courier New', monospace">Courier</option>
-              <option value="Impact, sans-serif">Impact</option>
-              <option value="'Times New Roman', serif">Times New Roman</option>
-            </select>
-          </div>
-          <div>
-            <div class="field-label">Size: <span id="sizeVal">28</span>px</div>
-            <input type="range" id="fontSize" min="12" max="72" value="28" oninput="document.getElementById('sizeVal').textContent=this.value; updateActiveLayer('fontSize', parseInt(this.value))" onchange="pushState()">
-          </div>
-        </div>
-        <div>
-          <div class="field-label">Text Color</div>
-          <div class="color-row">
-            <div class="color-swatch active" style="background:#fff" data-color="#ffffff" onclick="setColor(this)"></div>
-            <div class="color-swatch" style="background:#ffd700" data-color="#ffd700" onclick="setColor(this)"></div>
-            <div class="color-swatch" style="background:#ff6b8a" data-color="#ff6b8a" onclick="setColor(this)"></div>
-            <div class="color-swatch" style="background:#56cffc" data-color="#56cffc" onclick="setColor(this)"></div>
-            <div class="color-swatch" style="background:#45e0a0" data-color="#45e0a0" onclick="setColor(this)"></div>
-            <div class="color-swatch" style="background:#c56cfc" data-color="#c56cfc" onclick="setColor(this)"></div>
-            <input type="color" class="field-input" id="customColor" value="#ffffff" oninput="updateActiveLayer('color', this.value)" onchange="pushState()" style="width:60px;height:30px;padding:2px 4px;border-radius:50%;cursor:pointer;">
-          </div>
-        </div>
-        <div>
-          <div class="field-label">Text Opacity: <span id="opacityVal">100</span>%</div>
-          <input type="range" id="textOpacity" min="10" max="100" value="100" oninput="document.getElementById('opacityVal').textContent=this.value; updateActiveLayer('opacity', this.value/100)" onchange="pushState()">
-        </div>
-        <div>
-          <div class="field-label">Text Position</div>
-          <div class="pos-grid" id="posGrid">
-            <button class="pos-btn" onclick="setPosBtn(this,'top-left')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'top-center')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'top-right')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'mid-left')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'mid-center')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'mid-right')"></button>
-            <button class="pos-btn active" onclick="setPosBtn(this,'bot-left')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'bot-center')"></button>
-            <button class="pos-btn" onclick="setPosBtn(this,'bot-right')"></button>
+            <!-- Custom sticker upload -->
+            <div style="width:100%;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;">
+              <div class="field-label" style="margin-bottom:4px;font-size:0.68rem;">Admin: Upload Custom PNG Sticker</div>
+              <input type="file" id="stickerUpload" accept="image/png" style="display:none;" onchange="uploadCustomSticker(this)">
+              <button class="plt-btn" style="width:100%;justify-content:center;font-size:0.72rem;" onclick="document.getElementById('stickerUpload').click()">📁 Upload PNG Sticker</button>
+              <div id="customStickers" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Image filters -->
-        <div class="filters-section">
-          <div class="section-head">
-            <div class="field-label" style="margin:0">🎨 Image Adjustments</div>
-            <div style="display:flex; gap:8px">
-              <button class="plt-btn" style="padding:3px 10px;font-size:0.72rem" onclick="randomizeFilters()" title="Generate random filter settings">🎲 Surprise Me</button>
-              <button class="plt-btn" style="padding:3px 10px;font-size:0.72rem" onclick="resetFilters()" title="Reset all adjustments">↺ Reset</button>
+        <!-- Active text controls (shown only when a text layer is selected) -->
+        <div id="textControls" style="display:flex;flex-direction:column;gap:0.85rem;">
+          <div>
+            <div class="field-label" id="mainLabel">Caption Text</div>
+            <input class="field-input" id="txtMain" type="text" placeholder="Type your text here…" oninput="updateActiveLayer('text', this.value)" onchange="pushState()">
+            <!-- hidden sub-text kept for JS compat -->
+            <input type="hidden" id="txtSub" value="">
+          </div>
+          <div class="font-row">
+            <div>
+              <div class="field-label">Font</div>
+              <select class="field-input" id="fontFamily" onchange="pushState(); updateActiveLayer('fontFamily', this.value)">
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Arial', sans-serif">Arial</option>
+                <option value="'Verdana', sans-serif">Verdana</option>
+                <option value="'Courier New', monospace">Courier</option>
+                <option value="Impact, sans-serif">Impact</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+              </select>
+            </div>
+            <div>
+              <div class="field-label">Size: <span id="sizeVal">28</span>px</div>
+              <input type="range" id="fontSize" min="12" max="72" value="28" oninput="document.getElementById('sizeVal').textContent=this.value; updateActiveLayer('fontSize', parseInt(this.value))" onchange="pushState()">
             </div>
           </div>
-          <div class="filters-grid-2">
-            <div class="filter-item">
-              <div class="field-label">Brightness: <span id="fl_brightness">100</span>%</div>
-              <input type="range" id="f_brightness" min="0" max="200" value="100" oninput="F.brightness=+this.value;document.getElementById('fl_brightness').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
-            <div class="filter-item">
-              <div class="field-label">Contrast: <span id="fl_contrast">100</span>%</div>
-              <input type="range" id="f_contrast" min="0" max="200" value="100" oninput="F.contrast=+this.value;document.getElementById('fl_contrast').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
-            <div class="filter-item">
-              <div class="field-label">Saturation: <span id="fl_saturation">100</span>%</div>
-              <input type="range" id="f_saturation" min="0" max="200" value="100" oninput="F.saturation=+this.value;document.getElementById('fl_saturation').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
-            <div class="filter-item">
-              <div class="field-label">Blur: <span id="fl_blur">0</span>px</div>
-              <input type="range" id="f_blur" min="0" max="15" value="0" oninput="F.blur=+this.value;document.getElementById('fl_blur').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
-            <div class="filter-item">
-              <div class="field-label">Grayscale: <span id="fl_grayscale">0</span>%</div>
-              <input type="range" id="f_grayscale" min="0" max="100" value="0" oninput="F.grayscale=+this.value;document.getElementById('fl_grayscale').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
-            <div class="filter-item">
-              <div class="field-label">Sepia: <span id="fl_sepia">0</span>%</div>
-              <input type="range" id="f_sepia" min="0" max="100" value="0" oninput="F.sepia=+this.value;document.getElementById('fl_sepia').textContent=this.value;renderEditor()" onchange="pushState()">
+          <div>
+            <div class="field-label">Text Color</div>
+            <div class="color-row">
+              <div class="color-swatch active" style="background:#fff" data-color="#ffffff" onclick="setColor(this)"></div>
+              <div class="color-swatch" style="background:#ffd700" data-color="#ffd700" onclick="setColor(this)"></div>
+              <div class="color-swatch" style="background:#ff6b8a" data-color="#ff6b8a" onclick="setColor(this)"></div>
+              <div class="color-swatch" style="background:#56cffc" data-color="#56cffc" onclick="setColor(this)"></div>
+              <div class="color-swatch" style="background:#45e0a0" data-color="#45e0a0" onclick="setColor(this)"></div>
+              <div class="color-swatch" style="background:#c56cfc" data-color="#c56cfc" onclick="setColor(this)"></div>
+              <input type="color" class="field-input" id="customColor" value="#ffffff" oninput="updateActiveLayer('color', this.value)" onchange="pushState()" style="width:60px;height:30px;padding:2px 4px;border-radius:50%;cursor:pointer;">
             </div>
           </div>
-          <div class="filters-grid-2" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border)">
-            <div class="filter-item">
-              <div class="field-label">Corner Radius: <span id="al_radius">0</span>px</div>
-              <input type="range" id="a_radius" min="0" max="100" value="0" oninput="A.radius=+this.value;document.getElementById('al_radius').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
-            <div class="filter-item">
-              <div class="field-label">Vignette: <span id="al_vignette">0</span>%</div>
-              <input type="range" id="a_vignette" min="0" max="100" value="0" oninput="A.vignette=this.value/100;document.getElementById('al_vignette').textContent=this.value;renderEditor()" onchange="pushState()">
-            </div>
+          <div>
+            <div class="field-label">Text Opacity: <span id="opacityVal">100</span>%</div>
+            <input type="range" id="textOpacity" min="10" max="100" value="100" oninput="document.getElementById('opacityVal').textContent=this.value; updateActiveLayer('opacity', this.value/100)" onchange="pushState()">
+          </div>
+          <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:var(--r-sm);padding:0.6rem;font-size:0.76rem;color:var(--muted);">
+            💡 Tap any element on the canvas to select it, then drag to move. Press Delete to remove.
           </div>
         </div>
       </div>
 
-      <!-- Canvas preview -->
-      <div class="canvas-wrap">
+      <!-- Canvas preview with live watermark -->
+      <div class="canvas-wrap" style="position:relative;">
         <canvas id="editorCanvas" width="600" height="450"></canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:2rem;font-weight:900;color:rgba(255,255,255,0.18);pointer-events:none;white-space:nowrap;letter-spacing:4px;text-transform:uppercase;">PREVIEW</div>
       </div>
     </div>
 
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="gotoStep(1)">← Back</button>
-      <button class="btn btn-primary" onclick="gotoStep(3)">Next: Preview &amp; Download →</button>
+      <button class="btn btn-primary" onclick="gotoStep(3)">Add to Cart 🛒</button>
     </div>
   </div>
 
-  <!-- ── STEP 4: PREVIEW ── -->
+  <!-- ── STEP 4: ADD TO CART ── -->
   <div class="panel" id="panel-3">
-    <div class="panel-title">🎉 Preview &amp; Download</div>
-    <div class="panel-sub">See how your design looks on each platform, then download</div>
-
-    <!-- Platform tabs -->
-    <div class="platform-tabs">
-      <button class="plt-btn active" id="plt-insta" onclick="setPlatform('instagram')">📷 Instagram Post</button>
-      <button class="plt-btn" id="plt-story" onclick="setPlatform('story')">📱 Instagram Story</button>
-      <button class="plt-btn" id="plt-fb" onclick="setPlatform('facebook')">📘 Facebook</button>
-      <button class="plt-btn" id="plt-twitter" onclick="setPlatform('twitter')">🐦 Twitter / X</button>
-    </div>
+    <div class="panel-title">🛒 Review &amp; Add to Cart</div>
+    <div class="panel-sub">Your custom design is ready! Review it below and add to cart.</div>
 
     <div class="preview-layout">
-      <!-- Platform mockup -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:1rem">
-        <div id="platformMockup"></div>
-        <div class="platform-note" id="platformNote">Instagram · 1080×1080px · Square Post</div>
+      <!-- Preview canvas with watermark -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
+        <div style="position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:#000;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+          <canvas id="previewCanvas" width="600" height="450" style="display:block;width:100%;"></canvas>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+            <div style="transform:rotate(-30deg);font-size:2.8rem;font-weight:900;color:rgba(255,255,255,0.22);letter-spacing:6px;text-transform:uppercase;white-space:nowrap;">PREVIEW</div>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);text-align:center;">⚠️ Watermark removed after purchase</div>
       </div>
 
       <div class="preview-side">
         <div class="info-card">
-          <div class="info-card-title">📋 Design Summary</div>
+          <div class="info-card-title">📋 Order Summary</div>
           <div class="info-row"><span>Template</span><span id="sumTemplate">—</span></div>
           <div class="info-row"><span>Caption</span><span id="sumCaption">—</span></div>
           <div class="info-row"><span>Font</span><span id="sumFont">—</span></div>
-          <div class="info-row"><span>Size</span><span id="sumSize">—</span></div>
-          <div class="info-row"><span>Platform</span><span id="sumPlatform">Instagram</span></div>
-          <div class="info-row"><span>Resolution</span><span id="sumRes">1080×1080px</span></div>
+          <div class="info-row"><span>Product</span><span>Custom Photo Print</span></div>
+          <div class="info-row"><span>Format</span><span>High-Res PNG</span></div>
         </div>
 
-        <div class="info-card">
-          <div class="info-card-title">💾 Export Settings</div>
-          <div style="display:flex; flex-direction:column; gap:0.8rem">
+        <div class="info-card" style="background:rgba(69,224,160,0.07);border-color:rgba(69,224,160,0.25);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;">
+            <span style="font-size:1.4rem;">🔒</span>
             <div>
-              <div class="field-label" style="font-size:0.65rem">Format</div>
-              <select class="field-input" style="padding:4px 8px; font-size:0.8rem" onchange="EXPORT.format=this.value; document.getElementById('qualityRow').style.display=(this.value==='image/png'?'none':'flex')">
-                <option value="image/png">PNG (Lossless)</option>
-                <option value="image/jpeg">JPG (Compressed)</option>
-                <option value="image/webp">WEBP (Modern)</option>
-              </select>
-            </div>
-            <div id="qualityRow" style="display:none; align-items:center; gap:8px">
-              <div class="field-label" style="font-size:0.65rem; margin:0">Quality: <span id="eq_val">92</span>%</div>
-              <input type="range" min="10" max="100" value="92" oninput="EXPORT.quality=this.value/100; document.getElementById('eq_val').textContent=this.value" style="flex:1">
+              <div style="font-weight:700;font-size:0.9rem;">Secure &amp; Private</div>
+              <div style="font-size:0.75rem;color:var(--muted);">Your photo never leaves your device until purchase</div>
             </div>
           </div>
         </div>
 
-        <div class="watermark-note">
-          <span class="wnote-icon">💧</span>
-          <span>Preview includes a <strong>watermark</strong>. Purchase a license to export clean full-res.</span>
-        </div>
-
-        <div style="margin-top: 0.5rem">
-           <button class="btn btn-secondary btn-download" style="border-style: dashed" onmousedown="isComparing=true; renderPreview()" onmouseup="isComparing=false; renderPreview()" onmouseleave="isComparing=false; renderPreview()">🔍 Hold to Compare Original</button>
-        </div>
-
         <div class="download-wrap">
-          <button class="btn btn-success btn-download" onclick="downloadImage()">⬇️ Download Preview</button>
+          <button class="btn btn-success btn-download" style="font-size:1rem;padding:1rem;" onclick="addToCart()">🛒 Add to Cart</button>
           <button class="btn btn-outline-accent btn-download" onclick="gotoStep(2)">✏️ Edit Again</button>
           <button class="btn btn-secondary btn-download" onclick="startOver()">🔄 Start Over</button>
         </div>
@@ -1249,43 +1172,33 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark, isOriginal) {
   // 3. Add text layers
   textLayers.forEach(layer => {
     const mainTxt = layer.text || '';
-    const subTxt  = layer.subText || '';
     const fs      = layer.fontSize;
     const ff      = layer.fontFamily;
     const op      = layer.opacity;
 
-    if (mainTxt || subTxt) {
+    if (mainTxt) {
       const pad = Math.round(w*0.05);
       const [vy, ha] = getTextAlign(layer.pos, pad, w, h, fs);
       ctx.save();
       ctx.globalAlpha = op;
-
-      // shadow
       ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
 
-      // main text
-      ctx.font = `bold ${fs}px ${ff}`;
-      ctx.fillStyle = layer.color;
-      ctx.textAlign = ha;
-      
-      // Calculate base position
+      const sxScale = w / 600;
+      const syScale = h / 450;
       let tx = ha==='left' ? pad : ha==='right' ? w-pad : w/2;
       let baseVy = vy;
+      tx += layer.dragOffset.x * sxScale;
+      baseVy += layer.dragOffset.y * syScale;
 
-      // Apply drag offset (scaled to current canvas size from 600x450 base)
-      const sx = w / 600;
-      const sy = h / 450;
-      tx += layer.dragOffset.x * sx;
-      baseVy += layer.dragOffset.y * sy;
-
-      ctx.fillText(mainTxt, tx, baseVy);
-
-      // sub text
-      if (subTxt) {
-        ctx.font = `${Math.round(fs*0.58)}px ${ff}`;
+      if (layer.isSticker && layer.stickerImg) {
+        // Draw custom PNG sticker image
+        const sz = fs * sxScale;
+        ctx.drawImage(layer.stickerImg, tx - sz/2, baseVy - sz/2, sz, sz);
+      } else {
+        ctx.font = `bold ${fs}px ${ff}`;
         ctx.fillStyle = layer.color;
-        ctx.globalAlpha = op * 0.75;
-        ctx.fillText(subTxt, tx, baseVy + fs*1.1);
+        ctx.textAlign = ha;
+        ctx.fillText(mainTxt, tx, baseVy);
       }
       ctx.restore();
     }
@@ -1337,6 +1250,7 @@ function getTextAlign(pos, pad, w, h, fs) {
 =================================================== */
 function buildTemplateGrid() {
   const grid = document.getElementById('templatesGrid');
+  if (!grid) return;
   grid.innerHTML = '';
   TEMPLATES.forEach((tpl, i) => {
     const c = document.createElement('canvas');
@@ -1352,12 +1266,40 @@ function buildTemplateGrid() {
   });
 }
 
+/* Inline mini template switcher inside editor step */
+function buildInlineTemplates() {
+  const grid = document.getElementById('inlineTemplatesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  TEMPLATES.forEach((tpl, i) => {
+    const c = document.createElement('canvas');
+    c.width=120; c.height=90;
+    tpl.draw(c.getContext('2d'), 120, 90);
+    const card = document.createElement('div');
+    card.style.cssText = `border-radius:8px;border:2px solid ${i===selectedTpl?'var(--accent1)':'var(--border)'};cursor:pointer;overflow:hidden;transition:all .25s;`;
+    card.appendChild(c);
+    c.style.cssText = 'display:block;width:100%;';
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'text-align:center;font-size:0.65rem;font-weight:600;padding:3px 2px;background:rgba(0,0,0,0.5);';
+    lbl.textContent = tpl.name;
+    card.appendChild(lbl);
+    card.onclick = () => {
+      selectedTpl = i;
+      buildInlineTemplates();
+      renderEditor();
+      showToast('Frame: ' + tpl.name);
+    };
+    grid.appendChild(card);
+  });
+}
+
 function selectTemplate(i) {
   pushState();
   selectedTpl = i;
   document.querySelectorAll('.template-card').forEach((el,j)=>{
     el.classList.toggle('selected', j===i);
   });
+  buildInlineTemplates();
 }
 
 /* ===================================================
@@ -1377,28 +1319,16 @@ function renderEditor() {
   const canvas = document.getElementById('editorCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, false, false); });
+  // Always render WITH watermark so live canvas shows watermark during editing
+  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, true, false); });
 }
 
 function renderPreview() {
-  const p = PLATFORMS[activePlatform];
-  const pw = p.w, ph = p.h;
-  // Off-screen canvas at platform resolution
-  const off = document.createElement('canvas');
-  off.width=pw; off.height=ph;
-  const ctx = off.getContext('2d');
-  // Draw template at platform size
-  const tOff = document.createElement('canvas');
-  tOff.width=pw; tOff.height=ph;
-  TEMPLATES[selectedTpl].draw(tOff.getContext('2d'), pw, ph);
-  const tImg = new Image();
-  tImg.onload = () => {
-    compositeOntoCanvas(ctx, pw, ph, tImg, true, isComparing);
-    renderPlatformMockup(off, p);
-  };
-  tImg.src = tOff.toDataURL();
-  // Keep reference for download
-  window._previewOffscreen = off;
+  // Render onto the cart-step preview canvas (600x450, with watermark)
+  const canvas = document.getElementById('previewCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, true, false); });
 
   // Summary
   document.getElementById('sumTemplate').textContent = TEMPLATES[selectedTpl].name;
@@ -1406,10 +1336,6 @@ function renderPreview() {
   document.getElementById('sumCaption').textContent  = cap.length>18 ? cap.slice(0,18)+'\u2026' : cap;
   const ff = document.getElementById('fontFamily').value;
   document.getElementById('sumFont').textContent     = ff.split(',')[0].replace(/'/g,'');
-  document.getElementById('sumSize').textContent     = document.getElementById('fontSize').value + 'px';
-  document.getElementById('sumPlatform').textContent = p.name;
-  document.getElementById('sumRes').textContent      = `${pw}\u00d7${ph}px`;
-  document.getElementById('platformNote').textContent = p.note;
 }
 
 function renderPlatformMockup(offCanvas, p) {
@@ -1468,7 +1394,7 @@ function gotoStep(n) {
   updateStepper();
   if (n===1) buildTemplateGrid();
   if (n===2) {
-    buildLayersList();
+    buildInlineTemplates();
     syncLayerUI();
     setTimeout(renderEditor, 60);
   }
@@ -1729,6 +1655,7 @@ function switchLayer(idx) {
 }
 
 function buildLayersList() {
+  // Layers panel is hidden; this is kept for JS compatibility only
   const list = document.getElementById('layersList');
   if (!list) return;
   list.innerHTML = '';
@@ -1750,24 +1677,19 @@ function buildLayersList() {
 
 function syncLayerUI() {
   const l = textLayers[activeLayerIndex];
-  if (!l) return;
+  const tc = document.getElementById('textControls');
+  if (!l) { if(tc) tc.style.display='none'; return; }
+  if(tc) tc.style.display = 'flex';
   
   const isSticker = !!l.isSticker;
   const mainInput = document.getElementById('txtMain');
   const mainLabel = document.getElementById('mainLabel');
-  const subWrap = document.getElementById('txtSub').parentElement;
   
   mainInput.value = l.text;
-  document.getElementById('txtSub').value = l.subText;
+  const txtSubEl = document.getElementById('txtSub');
+  if (txtSubEl) txtSubEl.value = l.subText || '';
   
-  // Adjust UI labels if sticker
-  if (isSticker) {
-    if (mainLabel) mainLabel.textContent = 'Emoji Sticker';
-    subWrap.style.display = 'none';
-  } else {
-    if (mainLabel) mainLabel.textContent = 'Caption';
-    subWrap.style.display = 'block';
-  }
+  if (mainLabel) mainLabel.textContent = isSticker ? 'Emoji / Sticker' : 'Caption Text';
 
   document.getElementById('fontFamily').value = l.fontFamily;
   document.getElementById('fontSize').value = l.fontSize;
@@ -1903,13 +1825,14 @@ function initCanvasInteractions() {
    EMOJI
 =================================================== */
 function toggleEmojiPanel() {
-  document.getElementById('emojiPanel').classList.toggle('open');
+  // Panel is now always-visible inline, nothing to toggle
 }
 function setEmojiTarget(t) {
   emojiTarget = t;
-  document.getElementById('epMain').classList.toggle('active', t==='main');
-  document.getElementById('epSub').classList.toggle('active',  t==='sub');
-  document.getElementById('epSticker').classList.toggle('active', t==='sticker');
+  const epMain = document.getElementById('epMain');
+  const epSticker = document.getElementById('epSticker');
+  if (epMain) epMain.classList.toggle('active', t==='main');
+  if (epSticker) epSticker.classList.toggle('active', t==='sticker');
 }
 function insertEmoji(emoji) {
   if (emojiTarget === 'sticker') {
@@ -1968,21 +1891,50 @@ document.addEventListener('click', e => {
 });
 
 /* ===================================================
-   DOWNLOAD
+   ADD TO CART
 =================================================== */
-function downloadImage() {
-  // Use the latest rendered offscreen canvas (platform resolution)
-  const src = window._previewOffscreen;
-  if (!src) { showToast('Preview not ready yet'); return; }
-  
-  const ext = EXPORT.format.split('/')[1];
-  const link = document.createElement('a');
-  link.download = `canvasflow-${activePlatform}-preview.${ext === 'jpeg' ? 'jpg' : ext}`;
-  link.href = src.toDataURL(EXPORT.format, EXPORT.quality);
-  link.click();
-  
-  showToast('✨ Success! Downloading...');
+function addToCart() {
+  showToast('🛒 Added to cart! Redirecting to checkout…');
   createConfetti();
+  // In production: submit order data to backend here
+}
+
+/* Custom sticker upload */
+function uploadCustomSticker(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const container = document.getElementById('customStickers');
+  const btn = document.createElement('span');
+  btn.style.cssText = 'font-size:1.4rem;cursor:pointer;border-radius:6px;padding:3px;transition:background 0.15s;display:inline-block;';
+  btn.title = file.name;
+  // Draw as image sticker on canvas
+  const img = new Image();
+  img.onload = () => {
+    btn.style.backgroundImage = `url(${url})`;
+    btn.style.backgroundSize = 'contain';
+    btn.style.backgroundRepeat = 'no-repeat';
+    btn.style.width = '36px';
+    btn.style.height = '36px';
+    btn.onclick = () => {
+      pushState();
+      const newLayer = {
+        id: Date.now(), text: '', subText: '',
+        color: '#ffffff', pos: 'mid-center',
+        dragOffset: {x:0,y:0}, fontSize:80,
+        fontFamily: 'Georgia, serif', opacity:1,
+        isSticker:true, stickerImg: img
+      };
+      textLayers.push(newLayer);
+      activeLayerIndex = textLayers.length - 1;
+      syncLayerUI();
+      renderEditor();
+      showToast('✨ Custom sticker added!');
+    };
+    container.appendChild(btn);
+  };
+  img.src = url;
+  input.value = '';
 }
 
 /* ===================================================
