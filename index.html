@@ -2354,11 +2354,12 @@ function initCanvasInteractions() {
     if (hit) {
       startInteraction(mx, my, hit);
     } else {
-      // Click on blank canvas → deselect
-      isLayerSelected = false;
+      // Click on blank canvas → exit edit + deselect
+      exitEditMode();
+      isLayerSelected   = false;
       hoveredLayerIndex = -1;
-      isDraggingPhoto = true;
-      photoDragStart = { x: mx, y: my };
+      isDraggingPhoto   = true;
+      photoDragStart    = { x: mx, y: my };
       photoDragOffsetStart = { ...photoOffset };
       canvas.style.cursor = 'move';
       renderEditor();
@@ -2405,13 +2406,18 @@ function initCanvasInteractions() {
     }
     // Cursor
     const hit = findTextLayerAtPoint(mx, my, canvas);
-    if (!hit) { canvas.style.cursor = found >= 0 ? 'grab' : 'move'; return; }
-    const cursors = { rotate:'crosshair', resize:'nw-resize', move:'grab' };
+    if (!hit) { canvas.style.cursor = found >= 0 ? 'text' : 'move'; return; }
+    if (hit.mode === 'delete') { canvas.style.cursor = 'pointer'; return; }
     if (hit.mode === 'resize') {
       const c = { TL:'nw-resize', TR:'ne-resize', BR:'se-resize', BL:'sw-resize' };
       canvas.style.cursor = c[hit.corner] || 'nw-resize';
+    } else if (hit.mode === 'rotate') {
+      canvas.style.cursor = 'crosshair';
+    } else if (hit.mode === 'body') {
+      // Show text cursor if already selected (editing is next click), else grab
+      canvas.style.cursor = (isLayerSelected && hit.idx === activeLayerIndex) ? 'text' : 'grab';
     } else {
-      canvas.style.cursor = cursors[hit.mode] || 'grab';
+      canvas.style.cursor = 'grab';
     }
   });
 
