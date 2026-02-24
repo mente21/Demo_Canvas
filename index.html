@@ -859,8 +859,8 @@
   </div>
 
   <!-- Hidden input for inline canvas text editing (captures keyboard) -->
-  <input id="canvasTextInput" type="text" autocomplete="off" spellcheck="false"
-    style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px;">
+  <input id="canvasTextInput" type="text" autocomplete="off" spellcheck="false" inputmode="text"
+    style="position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px;transform:translateY(-100%);border:none;outline:none;padding:0;margin:0;">
 
   <!-- ── STEP 1: UPLOAD ── -->
 
@@ -1405,6 +1405,7 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark, isOriginal) {
         layer._bbox = { cx: tx, cy: baseVy, w: sz, h: sz, rot };
       } else {
         const scaledFs = fs * sxScale;
+        ctx.direction = 'ltr';
         ctx.font = `bold ${scaledFs}px ${ff}`;
         ctx.fillStyle = layer.color;
         ctx.textAlign = 'center';
@@ -2204,7 +2205,7 @@ function enterEditMode(idx) {
   const input = document.getElementById('canvasTextInput');
   const layer = textLayers[idx];
   input.value = layer.text || '';
-  input.focus();
+  input.focus({ preventScroll: true });
   const len = input.value.length;
   input.setSelectionRange(len, len);
   renderEditor();
