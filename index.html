@@ -2375,6 +2375,7 @@ function initCanvasInteractions() {
       const rect = canvas.getBoundingClientRect();
       photoOffset.x = photoDragOffsetStart.x + (mx - photoDragStart.x) * (600 / rect.width);
       photoOffset.y = photoDragOffsetStart.y + (my - photoDragStart.y) * (450 / rect.height);
+      clampPhotoOffset();
       renderEditor();
     }
   });
@@ -2427,6 +2428,7 @@ function initCanvasInteractions() {
     e.preventDefault();
     const delta = e.deltaY < 0 ? 0.1 : -0.1;
     photoZoom = Math.min(3.0, Math.max(1.0, photoZoom + delta));
+    clampPhotoOffset();
     syncZoomUI();
     renderEditor();
   }, { passive: false });
@@ -2475,6 +2477,7 @@ function initCanvasInteractions() {
         const scaleY = 450 / rect.height;
         photoOffset.x = photoDragOffsetStart.x + (mx - photoDragStart.x) * scaleX;
         photoOffset.y = photoDragOffsetStart.y + (my - photoDragStart.y) * scaleY;
+        clampPhotoOffset();
         renderEditor();
       }
     } else if (e.touches.length === 2 && lastTouchDist !== null) {
@@ -2484,6 +2487,7 @@ function initCanvasInteractions() {
       const ratio = dist / lastTouchDist;
       photoZoom = Math.min(3.0, Math.max(1.0, photoZoom * ratio));
       lastTouchDist = dist;
+      clampPhotoOffset();
       syncZoomUI();
       renderEditor();
     }
@@ -2508,8 +2512,30 @@ function syncZoomUI() {
   if (sl) sl.value = pct;
 }
 
+/* ── Compute how far the photo can be panned before revealing empty slot area.
+   Works in canvas-space (600×450 base). Called after every pan or zoom change. ──*/
+function clampPhotoOffset() {
+  if (!uploadedImg) { photoOffset = { x: 0, y: 0 }; return; }
+  const W = 600, H = 450;
+  const b  = Math.round(W * 0.04);   // border width (same formula as compositeOntoCanvas)
+  const rw = W - b * 2;
+  const rh = H - b * 2;
+  const iw = uploadedImg.naturalWidth  || uploadedImg.width;
+  const ih = uploadedImg.naturalHeight || uploadedImg.height;
+  const baseScale = Math.max(rw / iw, rh / ih);
+  const scale = baseScale * photoZoom;
+  const sw = iw * scale;  // rendered photo width in canvas pixels
+  const sh = ih * scale;  // rendered photo height in canvas pixels
+  // Maximum offset = half the overflow in each axis (photo is centred before offset)
+  const maxOx = Math.max(0, (sw - rw) / 2);
+  const maxOy = Math.max(0, (sh - rh) / 2);
+  photoOffset.x = Math.max(-maxOx, Math.min(maxOx, photoOffset.x));
+  photoOffset.y = Math.max(-maxOy, Math.min(maxOy, photoOffset.y));
+}
+
 function setPhotoZoom(val) {
   photoZoom = Math.min(3.0, Math.max(1.0, parseFloat(val) / 100));
+  clampPhotoOffset();
   syncZoomUI();
   renderEditor();
 }
