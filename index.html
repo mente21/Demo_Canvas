@@ -845,26 +845,16 @@
     <p>Upload your photo, pick a frame template, add your custom text, then download with a watermark preview — all in the browser.</p>
   </div>
 
-  <!-- Stepper -->
+  <!-- Stepper (2 visible steps: Upload → Customize) -->
   <div class="stepper" id="stepper">
     <div class="step-item active" id="si-0" onclick="jumpTo(0)">
       <div class="step-num" id="sn-0">1</div>
       <div class="step-label">Upload Photo</div>
     </div>
     <div class="step-line" id="sl-0"></div>
-    <div class="step-item" id="si-1" onclick="jumpTo(1)">
+    <div class="step-item" id="si-1" onclick="jumpTo(2)">
       <div class="step-num" id="sn-1">2</div>
-      <div class="step-label">Choose Template</div>
-    </div>
-    <div class="step-line" id="sl-1"></div>
-    <div class="step-item" id="si-2" onclick="jumpTo(2)">
-      <div class="step-num" id="sn-2">3</div>
-      <div class="step-label">Add Text</div>
-    </div>
-    <div class="step-line" id="sl-2"></div>
-    <div class="step-item" id="si-3" onclick="jumpTo(3)">
-      <div class="step-num" id="sn-3">4</div>
-      <div class="step-label">Add to Cart</div>
+      <div class="step-label">Customize</div>
     </div>
   </div>
 
@@ -890,27 +880,17 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="gotoStep(1)">Next: Choose Template →</button>
+      <button class="btn btn-primary" onclick="gotoStep(2)">Next: Customize Design →</button>
     </div>
   </div>
 
-  <!-- ── STEP 2: TEMPLATE ── -->
-  <div class="panel" id="panel-1">
-    <div class="panel-title">🖼 Choose a Frame Template</div>
-    <div class="panel-sub">Select how your photo will be framed and styled</div>
-
-    <div class="templates-grid" id="templatesGrid"></div>
-
-    <div class="btn-row">
-      <button class="btn btn-secondary" onclick="gotoStep(0)">← Back</button>
-      <button class="btn btn-primary" onclick="gotoStep(2)">Next: Add Text →</button>
-    </div>
-  </div>
+  <!-- panel-1 hidden (template step removed; switching is inline) -->
+  <div class="panel" id="panel-1" style="display:none!important;"></div>
 
   <!-- ── STEP 3: CUSTOMIZE ── -->
   <div class="panel" id="panel-2">
     <div class="panel-title">✏️ Customize Your Design</div>
-    <div class="panel-sub">Pick a frame, add text &amp; stickers — tap elements on the canvas to drag them</div>
+    <div class="panel-sub">Switch frame, add &amp; drag text — drag the photo inside the frame to reposition it</div>
 
     <div class="text-layout">
       <!-- Controls -->
@@ -972,8 +952,18 @@
             <input type="range" id="textOpacity" min="10" max="100" value="100" oninput="document.getElementById('opacityVal').textContent=this.value; updateActiveLayer('opacity', this.value/100)" onchange="pushState()">
           </div>
           <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:var(--r-sm);padding:0.6rem;font-size:0.76rem;color:var(--muted);">
-            💡 Tap any element on the canvas to select it, then drag to move. Press Delete to remove.
+            💡 Tap text on the canvas to select &amp; drag it. Scroll/pinch to zoom photo. Drag the photo area to reposition.
           </div>
+        </div>
+
+        <!-- Photo Pan & Zoom controls -->
+        <div style="background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:var(--r-sm);padding:0.85rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+            <div class="field-label" style="margin-bottom:0;">🔍 Photo Zoom: <span id="zoomVal">100</span>%</div>
+            <button class="btn btn-secondary" style="font-size:0.72rem;padding:3px 10px;" onclick="resetPhotoView()">Reset</button>
+          </div>
+          <input type="range" id="photoZoomSlider" min="100" max="300" value="100" oninput="setPhotoZoom(this.value)">
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem;">👆 Drag the canvas to pan · Scroll to zoom · Pinch on mobile</div>
         </div>
       </div>
 
@@ -985,56 +975,13 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="gotoStep(1)">← Back</button>
-      <button class="btn btn-primary" onclick="gotoStep(3)">Add to Cart 🛒</button>
+      <button class="btn btn-secondary" onclick="gotoStep(0)">← Back</button>
+      <button class="btn btn-primary" onclick="addToCart()">Add to Cart 🛒</button>
     </div>
   </div>
 
-  <!-- ── STEP 4: ADD TO CART ── -->
-  <div class="panel" id="panel-3">
-    <div class="panel-title">🛒 Review &amp; Add to Cart</div>
-    <div class="panel-sub">Your custom design is ready! Review it below and add to cart.</div>
-
-    <div class="preview-layout">
-      <!-- Preview canvas with watermark -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
-        <div style="position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:#000;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-          <canvas id="previewCanvas" width="600" height="450" style="display:block;width:100%;"></canvas>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-            <div style="transform:rotate(-30deg);font-size:2.8rem;font-weight:900;color:rgba(255,255,255,0.22);letter-spacing:6px;text-transform:uppercase;white-space:nowrap;">PREVIEW</div>
-          </div>
-        </div>
-        <div style="font-size:0.75rem;color:var(--muted);text-align:center;">⚠️ Watermark removed after purchase</div>
-      </div>
-
-      <div class="preview-side">
-        <div class="info-card">
-          <div class="info-card-title">📋 Order Summary</div>
-          <div class="info-row"><span>Template</span><span id="sumTemplate">—</span></div>
-          <div class="info-row"><span>Caption</span><span id="sumCaption">—</span></div>
-          <div class="info-row"><span>Font</span><span id="sumFont">—</span></div>
-          <div class="info-row"><span>Product</span><span>Custom Photo Print</span></div>
-          <div class="info-row"><span>Format</span><span>High-Res PNG</span></div>
-        </div>
-
-        <div class="info-card" style="background:rgba(69,224,160,0.07);border-color:rgba(69,224,160,0.25);">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;">
-            <span style="font-size:1.4rem;">🔒</span>
-            <div>
-              <div style="font-weight:700;font-size:0.9rem;">Secure &amp; Private</div>
-              <div style="font-size:0.75rem;color:var(--muted);">Your photo never leaves your device until purchase</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="download-wrap">
-          <button class="btn btn-success btn-download" style="font-size:1rem;padding:1rem;" onclick="addToCart()">🛒 Add to Cart</button>
-          <button class="btn btn-outline-accent btn-download" onclick="gotoStep(2)">✏️ Edit Again</button>
-          <button class="btn btn-secondary btn-download" onclick="startOver()">🔄 Start Over</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- panel-3 removed (review step bypassed; Add to Cart goes straight to cart) -->
+  <div class="panel" id="panel-3" style="display:none!important;"></div>
 
   <!-- ── SECTION 4: CART ── -->
   <div class="panel" id="panel-4">
@@ -1072,7 +1019,7 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="gotoStep(3)">← Back</button>
+      <button class="btn btn-secondary" onclick="gotoStep(2)">← Back to Editor</button>
       <button class="btn btn-primary" onclick="gotoCheckout()">Checkout →</button>
     </div>
   </div>
@@ -1198,6 +1145,13 @@ let currentStep   = 0;
 let activePlatform = 'instagram';
 let emojiTarget    = 'main'; // used to identify which text field is active in the emoji picker logic
 
+// Photo pan/zoom state (offset in canvas-space pixels, zoom 1.0 = fit)
+let photoOffset = { x: 0, y: 0 };
+let photoZoom   = 1.0;
+let isDraggingPhoto = false;
+let photoDragStart  = { x: 0, y: 0 };
+let photoDragOffsetStart = { x: 0, y: 0 };
+
 // Text Layers State
 let textLayers = [
   { 
@@ -1209,13 +1163,20 @@ let textLayers = [
     dragOffset: { x: 0, y: 0 },
     fontSize: 28,
     fontFamily: 'Georgia, serif',
-    opacity: 1
+    opacity: 1,
+    rotation: 0
   }
 ];
-let activeLayerIndex = 0;
-let isDraggingText = false;
-let dragStart      = { x: 0, y: 0 };
-let isComparing    = false; // Before/After toggle
+let activeLayerIndex  = 0;
+let isLayerSelected   = false;  // true = user clicked a layer (shows handles)
+let hoveredLayerIndex = -1;     // index of layer under cursor (-1 = none)
+let isDraggingText    = false;
+let dragMode          = 'move'; // 'move' | 'rotate' | 'resize'
+let dragStart         = { x: 0, y: 0 };
+let rotateStartAngle  = 0;
+let resizeStartDist   = 1;      // distance from center at resize drag start
+let resizeStartFont   = 12;     // fontSize at resize drag start
+let isComparing       = false;
 
 // History Stack
 let historyStack = [];
@@ -1334,14 +1295,22 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark, isOriginal) {
   ctx.clearRect(0,0,w,h);
   const b = isOriginal ? 0 : Math.round(w * 0.04);
 
-  // 1. Draw uploaded image
+  // 1. Draw uploaded image — respects pan (photoOffset) and zoom (photoZoom)
   if (uploadedImg) {
     const iw = uploadedImg.naturalWidth || uploadedImg.width;
     const ih = uploadedImg.naturalHeight || uploadedImg.height;
     const rw = w - b*2, rh = h - b*2;
-    const scale = Math.max(rw/iw, rh/ih);
+    // Base scale: cover the slot
+    const baseScale = Math.max(rw/iw, rh/ih);
+    // Apply user zoom on top of base scale
+    const scale = baseScale * (isOriginal ? 1 : photoZoom);
     const sw = iw*scale, sh = ih*scale;
-    const sx = b + (rw-sw)/2, sy = b + (rh-sh)/2;
+    // Center + apply user pan offset (scaled to canvas size)
+    const panScale = w / 600;
+    const ox = isOriginal ? 0 : photoOffset.x * panScale;
+    const oy = isOriginal ? 0 : photoOffset.y * panScale;
+    const sx = b + (rw-sw)/2 + ox;
+    const sy = b + (rh-sh)/2 + oy;
     ctx.save();
     
     // Path for Clipping (Rounded Corners)
@@ -1390,18 +1359,16 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark, isOriginal) {
   if (tImg) ctx.drawImage(tImg, 0, 0, w, h);
 
   // 3. Add text layers
-  textLayers.forEach(layer => {
+  textLayers.forEach((layer, layerIdx) => {
     const mainTxt = layer.text || '';
     const fs      = layer.fontSize;
     const ff      = layer.fontFamily;
     const op      = layer.opacity;
+    const rot     = layer.rotation || 0;
 
     if (mainTxt) {
       const pad = Math.round(w*0.05);
       const [vy, ha] = getTextAlign(layer.pos, pad, w, h, fs);
-      ctx.save();
-      ctx.globalAlpha = op;
-      ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
 
       const sxScale = w / 600;
       const syScale = h / 450;
@@ -1410,17 +1377,35 @@ function compositeOntoCanvas(ctx, w, h, tImg, addWatermark, isOriginal) {
       tx += layer.dragOffset.x * sxScale;
       baseVy += layer.dragOffset.y * syScale;
 
+      ctx.save();
+      ctx.globalAlpha = op;
+
+      // Translate to text anchor, rotate, then draw
+      ctx.translate(tx, baseVy);
+      ctx.rotate(rot);
+
       if (layer.isSticker && layer.stickerImg) {
-        // Draw custom PNG sticker image
         const sz = fs * sxScale;
-        ctx.drawImage(layer.stickerImg, tx - sz/2, baseVy - sz/2, sz, sz);
+        ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
+        ctx.drawImage(layer.stickerImg, -sz/2, -sz/2, sz, sz);
+        // Store bbox in local coords
+        layer._bbox = { cx: tx, cy: baseVy, w: sz, h: sz, rot };
       } else {
-        ctx.font = `bold ${fs}px ${ff}`;
+        ctx.font = `bold ${fs * sxScale}px ${ff}`;
         ctx.fillStyle = layer.color;
-        ctx.textAlign = ha;
-        ctx.fillText(mainTxt, tx, baseVy);
+        ctx.textAlign = 'center'; // always center around anchor after translate
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=8;
+        // measure for bbox
+        const metrics = ctx.measureText(mainTxt);
+        const tw = metrics.width;
+        const th = fs * sxScale * 1.2;
+        ctx.fillText(mainTxt, 0, 0);
+        layer._bbox = { cx: tx, cy: baseVy, w: tw + 20, h: th + 10, rot };
       }
       ctx.restore();
+    } else {
+      layer._bbox = null;
     }
   });
 
@@ -1539,8 +1524,121 @@ function renderEditor() {
   const canvas = document.getElementById('editorCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  // Always render WITH watermark so live canvas shows watermark during editing
-  getTemplateImage(tImg => { compositeOntoCanvas(ctx, 600, 450, tImg, true, false); });
+  getTemplateImage(tImg => {
+    compositeOntoCanvas(ctx, 600, 450, tImg, true, false);
+    // Draw handles only on hover or when actively selected
+    textLayers.forEach((layer, i) => {
+      const show = (isLayerSelected && i === activeLayerIndex) || i === hoveredLayerIndex;
+      if (show && layer._bbox) drawSelectionHandles(ctx, layer, 600, 450);
+    });
+  });
+}
+
+/* ====================================================
+   SELECTION HANDLES OVERLAY
+   Draws Canva-style handles for the active text layer.
+===================================================== */
+/* drawSelectionHandles — called per-layer, only when hovered or selected */
+function drawSelectionHandles(ctx, layer, w, h) {
+  const { cx, cy, w: bw, h: bh, rot } = layer._bbox;
+  const HANDLE_R   = 10;
+  const MOVE_R     = 11;
+  const CORNER_R   = 7;
+  const STEM_LEN   = bh / 2 + 20;
+  const LINE_COLOR = 'rgba(59,130,246,0.95)';
+  const FILL_WHITE = 'rgba(255,255,255,0.97)';
+  const SHADOW_COL = 'rgba(0,80,200,0.4)';
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+
+  // ── Dashed bounding box ──
+  ctx.strokeStyle = LINE_COLOR;
+  ctx.lineWidth   = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.strokeRect(-bw/2, -bh/2, bw, bh);
+  ctx.setLineDash([]);
+
+  // ── Rotation handle at top ──
+  ctx.beginPath();
+  ctx.moveTo(0, -bh/2);
+  ctx.lineTo(0, -(STEM_LEN - HANDLE_R));
+  ctx.strokeStyle = LINE_COLOR;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(0, -STEM_LEN, HANDLE_R, 0, Math.PI*2);
+  ctx.fillStyle = FILL_WHITE;
+  ctx.shadowColor = SHADOW_COL; ctx.shadowBlur = 6;
+  ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 2; ctx.stroke();
+
+  // ↺ inside
+  ctx.beginPath(); ctx.arc(0, -STEM_LEN, 5, 0.3, Math.PI*1.8);
+  ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
+
+  // ── Move handle at bottom ──
+  const moveY = bh/2 + MOVE_R + 8;
+  ctx.beginPath(); ctx.moveTo(0, bh/2); ctx.lineTo(0, moveY - MOVE_R);
+  ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 1.5; ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(0, moveY, MOVE_R, 0, Math.PI*2);
+  ctx.fillStyle = FILL_WHITE; ctx.shadowColor = SHADOW_COL; ctx.shadowBlur = 6;
+  ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 2; ctx.stroke();
+
+  // ✛ crosshair inside move handle
+  const arrLen = 5.5, tip = 3;
+  ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-arrLen, moveY); ctx.lineTo(arrLen, moveY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, moveY-arrLen); ctx.lineTo(0, moveY+arrLen); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-arrLen+tip,moveY-tip); ctx.lineTo(-arrLen,moveY); ctx.lineTo(-arrLen+tip,moveY+tip); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(arrLen-tip,moveY-tip);  ctx.lineTo(arrLen,moveY);  ctx.lineTo(arrLen-tip,moveY+tip);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-tip,moveY-arrLen+tip); ctx.lineTo(0,moveY-arrLen); ctx.lineTo(tip,moveY-arrLen+tip); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-tip,moveY+arrLen-tip); ctx.lineTo(0,moveY+arrLen); ctx.lineTo(tip,moveY+arrLen-tip); ctx.stroke();
+  ctx.lineCap = 'butt';
+
+  // ── Corner resize handles (functional) ──
+  const corners = [[-bw/2,-bh/2],[bw/2,-bh/2],[bw/2,bh/2],[-bw/2,bh/2]];
+  const resizeCursors = ['nw-resize','ne-resize','se-resize','sw-resize'];
+  corners.forEach(([hx, hy]) => {
+    ctx.beginPath(); ctx.arc(hx, hy, CORNER_R, 0, Math.PI*2);
+    ctx.fillStyle = FILL_WHITE; ctx.shadowColor = SHADOW_COL; ctx.shadowBlur = 5;
+    ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 2; ctx.stroke();
+  });
+
+  ctx.restore();
+}
+
+/* Transform a local-space point to canvas-space, accounting for bbox rotation */
+function localToCanvas(bbox, lx, ly) {
+  const cos = Math.cos(bbox.rot), sin = Math.sin(bbox.rot);
+  return {
+    x: bbox.cx + lx * cos - ly * sin,
+    y: bbox.cy + lx * sin + ly * cos
+  };
+}
+
+function getRotateHandlePos(bbox) {
+  return localToCanvas(bbox, 0, -(bbox.h / 2 + 20));
+}
+
+function getMoveHandlePos(bbox) {
+  return localToCanvas(bbox, 0, bbox.h / 2 + 11 + 8);
+}
+
+/* Returns all 4 corner positions in canvas-space, with their resize cursor names */
+function getCornerHandles(bbox) {
+  const hw = bbox.w / 2, hh = bbox.h / 2;
+  return [
+    { pos: localToCanvas(bbox, -hw, -hh), name: 'TL' },
+    { pos: localToCanvas(bbox,  hw, -hh), name: 'TR' },
+    { pos: localToCanvas(bbox,  hw,  hh), name: 'BR' },
+    { pos: localToCanvas(bbox, -hw,  hh), name: 'BL' },
+  ];
 }
 
 function renderPreview() {
@@ -1608,20 +1706,17 @@ function setPlatform(key) {
    STEP NAV
 =================================================== */
 function gotoStep(n) {
-  if (n===1 && !uploadedImg) { showToast('Please upload an image first!'); return; }
-  if ((n===2||n===3||n===4||n===5) && !uploadedImg) { showToast('Please upload an image first!'); return; }
+  if (n >= 2 && !uploadedImg) { showToast('Please upload an image first!'); return; }
   currentStep = n;
   document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
   updateStepper();
-  if (n===1) buildTemplateGrid();
   if (n===2) {
     buildInlineTemplates();
     syncLayerUI();
     setTimeout(renderEditor, 60);
   }
-  if (n===3) setTimeout(renderPreview, 60);
   window.scrollTo({top:120, behavior:'smooth'});
-  if (n <= 3) persistState();
+  persistState();
 }
 
 function jumpTo(n) {
@@ -1629,12 +1724,15 @@ function jumpTo(n) {
   gotoStep(n);
 }
 
+// Stepper maps internal step indices to visible step positions (0→0, 2→1, 4→2)
 function updateStepper() {
-  for (let i=0;i<4;i++) {
+  const STEP_VISIBLE = [0, -1, 1, -1, 2, -1]; // maps panel index → visible step index (-1=hidden)
+  const visibleStep = STEP_VISIBLE[Math.min(currentStep, STEP_VISIBLE.length - 1)]; 
+  for (let i = 0; i < 3; i++) {
     const si = document.getElementById('si-'+i);
     const sn = document.getElementById('sn-'+i);
     if (!si || !sn) continue;
-    const eff = Math.min(currentStep, 3); // clamp for stepper display
+    const eff = visibleStep === -1 ? 2 : visibleStep;
     si.className = 'step-item' + (i===eff?' active': i<eff?' done':'');
     sn.textContent = i<eff ? '✓' : i+1;
     const sl = document.getElementById('sl-'+i);
@@ -1847,7 +1945,8 @@ function addTextLayer() {
     dragOffset: { x: 0, y: 0 },
     fontSize: 24,
     fontFamily: 'Georgia, serif',
-    opacity: 1
+    opacity: 1,
+    rotation: 0
   };
   textLayers.push(newLayer);
   activeLayerIndex = textLayers.length - 1;
@@ -1874,6 +1973,7 @@ function deleteTextLayer(e, idx) {
 
 function switchLayer(idx) {
   activeLayerIndex = idx;
+  isLayerSelected  = true;
   buildLayersList();
   syncLayerUI();
 }
@@ -1963,86 +2063,309 @@ function setPosBtn(el, pos) {
 =================================================== */
 
 /* ===================================================
-   CANVAS INTERACTION (Dragging)
+   CANVAS INTERACTION — Text Drag/Rotate + Photo Pan/Zoom
 =================================================== */
+
+function getPointerPos(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  if (e.touches) {
+    const t = e.touches[0];
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+/* Convert display-space coords to canvas-space (600x450) */
+function displayToCanvas(dx, dy, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: dx * (600 / rect.width),
+    y: dy * (450 / rect.height)
+  };
+}
+
+/* Hit-test a point (cx,cy) in canvas-space against a circle at (hx,hy) with radius r */
+function hitCircle(cx, cy, hx, hy, r) {
+  return Math.hypot(cx - hx, cy - hy) <= r;
+}
+
+/* Find the topmost text layer + handle under the pointer (display-space mx,my) */
+function findTextLayerAtPoint(mx, my, canvas) {
+  const { x: cx, y: cy } = displayToCanvas(mx, my, canvas);
+  const HIT_R = 16; // handle hit radius (canvas-space px)
+
+  // Only check handles of active, selected layer
+  if (isLayerSelected) {
+    const active = textLayers[activeLayerIndex];
+    if (active && active._bbox) {
+      // Rotation handle
+      const rh = getRotateHandlePos(active._bbox);
+      if (hitCircle(cx, cy, rh.x, rh.y, HIT_R)) return { idx: activeLayerIndex, mode: 'rotate' };
+      // Move handle
+      const mh = getMoveHandlePos(active._bbox);
+      if (hitCircle(cx, cy, mh.x, mh.y, HIT_R)) return { idx: activeLayerIndex, mode: 'move' };
+      // Corner resize handles
+      const corners = getCornerHandles(active._bbox);
+      for (const corner of corners) {
+        if (hitCircle(cx, cy, corner.pos.x, corner.pos.y, HIT_R)) {
+          return { idx: activeLayerIndex, mode: 'resize', corner: corner.name };
+        }
+      }
+    }
+  }
+
+  // Body hit-test — all layers (topmost first)
+  for (let i = textLayers.length - 1; i >= 0; i--) {
+    const l = textLayers[i];
+    if (!l._bbox) continue;
+    const { cx: bx, cy: by, w: bw, h: bh, rot } = l._bbox;
+    const dx = cx - bx, dy = cy - by;
+    const cos = Math.cos(-rot), sin = Math.sin(-rot);
+    const lx = dx * cos - dy * sin;
+    const ly = dx * sin + dy * cos;
+    if (Math.abs(lx) <= bw/2 + 10 && Math.abs(ly) <= bh/2 + 10) {
+      return { idx: i, mode: 'move' };
+    }
+  }
+  return null;
+}
+
 function initCanvasInteractions() {
   const canvas = document.getElementById('editorCanvas');
   if (!canvas) return;
 
-  canvas.addEventListener('mousedown', e => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    
-    // Find if clicking near ANY text layer
-    let foundIdx = -1;
-    for (let i = textLayers.length - 1; i >= 0; i--) {
-      const l = textLayers[i];
-      const fs = l.fontSize;
-      const pad = Math.round(600 * 0.05);
-      const [vy, ha] = getTextAlign(l.pos, pad, 600, 450, fs);
-      const tx = (ha==='left' ? pad : ha==='right' ? 600-pad : 300) + l.dragOffset.x;
-      const ty = vy + l.dragOffset.y;
+  // Helper: start text interaction
+  function startInteraction(mx, my, hit) {
+    const { idx, mode } = hit;
+    if (idx !== activeLayerIndex) { pushState(); switchLayer(idx); }
+    isLayerSelected = true;
+    isDraggingText  = true;
+    dragMode        = mode;
+    dragStart       = { x: mx, y: my };
 
-      const hitLimit = l.isSticker ? (fs * 0.8) : 60;
-      if (Math.hypot(mx - tx, my - ty) < hitLimit) {
-        foundIdx = i;
-        break;
+    if (mode === 'rotate') {
+      const layer = textLayers[idx];
+      if (layer._bbox) {
+        const cp = displayToCanvas(mx, my, canvas);
+        rotateStartAngle = Math.atan2(cp.y - layer._bbox.cy, cp.x - layer._bbox.cx) - (layer.rotation || 0);
       }
-    }
-
-    if (foundIdx !== -1) {
-      pushState();
-      switchLayer(foundIdx); // Select the clicked layer
-      isDraggingText = true;
-      dragStart = { x: mx, y: my };
+      canvas.style.cursor = 'crosshair';
+    } else if (mode === 'resize') {
+      // Record starting distance from center and current fontSize
+      const layer = textLayers[idx];
+      const cp = displayToCanvas(mx, my, canvas);
+      resizeStartDist = Math.hypot(cp.x - layer._bbox.cx, cp.y - layer._bbox.cy) || 1;
+      resizeStartFont = layer.fontSize;
+      const cursors = { TL:'nw-resize', TR:'ne-resize', BR:'se-resize', BL:'sw-resize' };
+      canvas.style.cursor = cursors[hit.corner] || 'nw-resize';
+    } else {
       canvas.style.cursor = 'grabbing';
+    }
+  }
+
+  // Helper: update text interaction
+  function updateInteraction(mx, my) {
+    if (!isDraggingText) return;
+    const layer = textLayers[activeLayerIndex];
+    if (!layer) return;
+
+    if (dragMode === 'rotate') {
+      if (layer._bbox) {
+        const cp = displayToCanvas(mx, my, canvas);
+        const angle = Math.atan2(cp.y - layer._bbox.cy, cp.x - layer._bbox.cx);
+        layer.rotation = angle - rotateStartAngle;
+      }
+    } else if (dragMode === 'resize') {
+      if (layer._bbox) {
+        // Uniform scale: ratio of current distance to start distance
+        const cp = displayToCanvas(mx, my, canvas);
+        const dist = Math.hypot(cp.x - layer._bbox.cx, cp.y - layer._bbox.cy);
+        const ratio = dist / resizeStartDist;
+        const newSize = Math.round(Math.max(8, Math.min(120, resizeStartFont * ratio)));
+        layer.fontSize = newSize;
+        // Sync the fontSize slider/display
+        const fsEl = document.getElementById('fontSize');
+        const svEl = document.getElementById('sizeVal');
+        if (fsEl) fsEl.value = newSize;
+        if (svEl) svEl.textContent = newSize;
+      }
+    } else {
+      // Move
+      const rect = canvas.getBoundingClientRect();
+      layer.dragOffset.x += (mx - dragStart.x) * (600 / rect.width);
+      layer.dragOffset.y += (my - dragStart.y) * (450 / rect.height);
+      dragStart = { x: mx, y: my };
+    }
+    renderEditor();
+  }
+
+  // ── Mouse ──
+  canvas.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const { x: mx, y: my } = getPointerPos(e, canvas);
+    const hit = findTextLayerAtPoint(mx, my, canvas);
+    if (hit) {
+      startInteraction(mx, my, hit);
+    } else {
+      // Click on blank canvas → deselect
+      isLayerSelected = false;
+      hoveredLayerIndex = -1;
+      isDraggingPhoto = true;
+      photoDragStart = { x: mx, y: my };
+      photoDragOffsetStart = { ...photoOffset };
+      canvas.style.cursor = 'move';
+      renderEditor();
     }
   });
 
   window.addEventListener('mousemove', e => {
-    if (!isDraggingText) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    
-    const l = textLayers[activeLayerIndex];
-    l.dragOffset.x += (mx - dragStart.x);
-    l.dragOffset.y += (my - dragStart.y);
-    dragStart = { x: mx, y: my };
-    renderEditor();
+    const { x: mx, y: my } = getPointerPos(e, canvas);
+    if (isDraggingText) {
+      updateInteraction(mx, my);
+    } else if (isDraggingPhoto) {
+      const rect = canvas.getBoundingClientRect();
+      photoOffset.x = photoDragOffsetStart.x + (mx - photoDragStart.x) * (600 / rect.width);
+      photoOffset.y = photoDragOffsetStart.y + (my - photoDragStart.y) * (450 / rect.height);
+      renderEditor();
+    }
   });
 
   window.addEventListener('mouseup', () => {
-    if (isDraggingText) {
-      isDraggingText = false;
-      canvas.style.cursor = 'default';
+    if (isDraggingText) { isDraggingText = false; canvas.style.cursor = 'default'; persistState(); }
+    if (isDraggingPhoto) { isDraggingPhoto = false; canvas.style.cursor = 'default'; }
+  });
+
+  // ── Hover tracking (desktop only) — shows handles on hover ──
+  canvas.addEventListener('mousemove', e => {
+    if (isDraggingText || isDraggingPhoto) return;
+    const { x: mx, y: my } = getPointerPos(e, canvas);
+    // Find which layer body (not handles) we are over for hover-highlight
+    const { x: cx, y: cy } = displayToCanvas(mx, my, canvas);
+    let found = -1;
+    for (let i = textLayers.length - 1; i >= 0; i--) {
+      const l = textLayers[i];
+      if (!l._bbox) continue;
+      const { cx: bx, cy: by, w: bw, h: bh, rot } = l._bbox;
+      const dx = cx - bx, dy = cy - by;
+      const cos = Math.cos(-rot), sin = Math.sin(-rot);
+      const lx = dx * cos - dy * sin;
+      const ly = dx * sin + dy * cos;
+      if (Math.abs(lx) <= bw/2 + 10 && Math.abs(ly) <= bh/2 + 10) { found = i; break; }
+    }
+    if (found !== hoveredLayerIndex) {
+      hoveredLayerIndex = found;
+      renderEditor(); // re-render to show/hide hover handles
+    }
+    // Cursor
+    const hit = findTextLayerAtPoint(mx, my, canvas);
+    if (!hit) { canvas.style.cursor = found >= 0 ? 'grab' : 'move'; return; }
+    const cursors = { rotate:'crosshair', resize:'nw-resize', move:'grab' };
+    if (hit.mode === 'resize') {
+      const c = { TL:'nw-resize', TR:'ne-resize', BR:'se-resize', BL:'sw-resize' };
+      canvas.style.cursor = c[hit.corner] || 'nw-resize';
+    } else {
+      canvas.style.cursor = cursors[hit.mode] || 'grab';
     }
   });
 
-  // Hover cursor
-  canvas.addEventListener('mousemove', e => {
-    if (isDraggingText) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    
-    let overSomething = false;
-    for (const l of textLayers) {
-      const fs = l.fontSize;
-      const pad = Math.round(600 * 0.05);
-      const [vy, ha] = getTextAlign(l.pos, pad, 600, 450, fs);
-      const tx = (ha==='left' ? pad : ha==='right' ? 600-pad : 300) + l.dragOffset.x;
-      const ty = vy + l.dragOffset.y;
-      
-      const hitLimit = l.isSticker ? (fs * 0.8) : 60;
-      if (Math.hypot(mx - tx, my - ty) < hitLimit) {
-        overSomething = true;
-        break;
+  // ── Scroll wheel zoom ──
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 0.1 : -0.1;
+    photoZoom = Math.min(3.0, Math.max(1.0, photoZoom + delta));
+    syncZoomUI();
+    renderEditor();
+  }, { passive: false });
+
+  // ── Touch ──
+  let lastTouchDist = null;
+  let touchDragMode = null; // 'text' | 'photo'
+
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const mx = t.clientX - rect.left;
+      const my = t.clientY - rect.top;
+      const hit = findTextLayerAtPoint(mx, my, canvas);
+      if (hit) {
+        startInteraction(mx, my, hit);
+        touchDragMode = 'text';
+      } else {
+        isDraggingPhoto = true;
+        touchDragMode = 'photo';
+        photoDragStart = { x: mx, y: my };
+        photoDragOffsetStart = { ...photoOffset };
       }
+    } else if (e.touches.length === 2) {
+      isDraggingText = false;
+      isDraggingPhoto = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastTouchDist = Math.hypot(dx, dy);
     }
-    canvas.style.cursor = overSomething ? 'grab' : 'default';
-  });
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const mx = t.clientX - rect.left;
+      const my = t.clientY - rect.top;
+      if (touchDragMode === 'text') {
+        updateInteraction(mx, my);
+      } else if (isDraggingPhoto && touchDragMode === 'photo') {
+        const scaleX = 600 / rect.width;
+        const scaleY = 450 / rect.height;
+        photoOffset.x = photoDragOffsetStart.x + (mx - photoDragStart.x) * scaleX;
+        photoOffset.y = photoDragOffsetStart.y + (my - photoDragStart.y) * scaleY;
+        renderEditor();
+      }
+    } else if (e.touches.length === 2 && lastTouchDist !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / lastTouchDist;
+      photoZoom = Math.min(3.0, Math.max(1.0, photoZoom * ratio));
+      lastTouchDist = dist;
+      syncZoomUI();
+      renderEditor();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', e => {
+    if (e.touches.length < 2) lastTouchDist = null;
+    if (e.touches.length === 0) {
+      if (isDraggingText) persistState();
+      isDraggingText = false;
+      isDraggingPhoto = false;
+      touchDragMode = null;
+    }
+  }, { passive: false });
+}
+
+function syncZoomUI() {
+  const pct = Math.round(photoZoom * 100);
+  const el = document.getElementById('zoomVal');
+  const sl = document.getElementById('photoZoomSlider');
+  if (el) el.textContent = pct;
+  if (sl) sl.value = pct;
+}
+
+function setPhotoZoom(val) {
+  photoZoom = Math.min(3.0, Math.max(1.0, parseFloat(val) / 100));
+  syncZoomUI();
+  renderEditor();
+}
+
+function resetPhotoView() {
+  photoOffset = { x: 0, y: 0 };
+  photoZoom = 1.0;
+  syncZoomUI();
+  renderEditor();
+  showToast('Photo view reset');
 }
 
 /* ===================================================
@@ -2131,24 +2454,11 @@ let selectedPayment = '';
 function addToCart() {
   if (!uploadedImg) { showToast('Upload an image first!'); return; }
 
-  // Capture watermarked canvas as thumbnail
-  const offC = document.createElement('canvas');
-  offC.width = 300; offC.height = 225;
-  const ctx2 = offC.getContext('2d');
-  getTemplateImage(tImg => {
-    compositeOntoCanvas(ctx2, 300, 225, tImg, true, false);
-    cartThumbUrl = offC.toDataURL('image/jpeg', 0.85);
-    cartQty = 1;
-    promoDiscount = 0;
-    selectedPayment = '';
-    document.getElementById('promoInput').value = '';
-    document.getElementById('shippingSelect').value = '0';
-    buildCartUI();
-    updateTotals();
-    createConfetti();
-    gotoStep(4);
-  });
+  // Just show a success notification — no cart page, no extra confirmation
+  createConfetti();
+  showToast('✅ Successfully added to cart!');
 }
+
 
 function buildCartUI() {
   const wrap = document.getElementById('cartItemsWrap');
